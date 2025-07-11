@@ -1,0 +1,193 @@
+
+// /////////////////////////////
+// //                      
+// //        COLORS
+// //
+// /////////////////////////////
+
+// //
+// // Brandind Colors
+// //
+// $branding-color1:#536cf0; //darker
+// $branding-color2:#898989; //brigter
+// $branding-color3:#9b9b9b; //neutral
+
+
+// //
+// // Gray system
+// //
+// $white:   #fff    !default;
+// $gray100: #f8f9fa !default;
+// $gray200: #efefef !default;
+// $gray300: #dee2e6 !default;
+// $gray400: #ced4da !default;
+// $gray500: #adb5bd !default;
+// $gray600: #6c757d !default;
+// $gray700: #495057 !default;
+// $gray800: #343a40 !default;
+// $gray900: #212529 !default;
+// $black:   #000    !default;
+
+// $grays: () !default;
+// $grays: map-merge(
+//   (
+//     "100": $gray100,
+//     "200": $gray200,
+//     "300": $gray300,
+//     "400": $gray400,
+//     "500": $gray500,
+//     "600": $gray600,
+//     "700": $gray700,
+//     "800": $gray800,
+//     "900": $gray900
+//   ),
+//   $grays
+// );
+
+
+// //
+// // Main Body Color
+// //
+// $body-color: #fff;
+
+// //
+// // HTML Colors
+// //
+// $hr-color-bg: #ccc;
+// $text-screen-color: #21759b;
+
+
+// //
+// // Typography Colors
+// //
+// $text-color: #000;
+// $text-color2: $branding-color1;
+
+// $heading-color:#000;
+// $heading-color-line:$branding-color1;
+// $heading-color2:$branding-color1;
+
+// $quote-bg-color: none;
+// $quote-border-color: $branding-color1;
+// $quote-quote-color: $branding-color1;
+
+// //
+// // Page Title Colors
+// //
+// $page-title-color: #fff;
+// $page-title-bg-color:#536cf0;
+
+
+// //
+// // Lay Out STRUCTURE Colors
+// //
+// $header-bg-color:#fff;
+// $main-bg-color: #000;
+// $sidebar-bg-color:none;
+// $article-bg-color: #fff;
+// $section-bg-color:#efefef;
+// //$footer-bg-color:#fdfaf7;
+// $footer-bg-color:#e0e0e0;
+
+// //
+// // General Links Colors
+// //
+
+// $link-color: #d8ae90;
+// $link-color-hover:$branding-color1;
+// //$link-color-visited: adjust-color($link-color, $hue: 80, $lightness: -4) !default;
+// //$link-color-active: adjust-color($link-color-hover, $lightness: -15) !default;
+
+
+// //
+// // Sidebar Links Colors
+// //
+// $sidebar-link-color:$branding-color1;
+// $sidebar-link-color-hover:#ccc;
+
+// //
+// // Article Links Colors
+// //
+// $article-link-color: #d8ae90;
+// $article-link-decoration-color:#d89090;
+// $article-link-color-hover:#ccc;
+
+
+// //
+// // Main Nav Colors
+// //
+// $main-nav-color: #000;
+// $main-nav-hover-color:$white;
+// $main-nav-hover-bg: $branding-color1;
+
+
+// //
+// // Sub Nav Colors
+// //
+// $sub-nav-color: #fff;
+// $sub-nav-color-hover: $black;
+
+// $sub-nav-bg: $branding-color1;
+// $sub-nav-bg-hover: $white;
+
+// $home-main-nav-color: #fff;
+// $home-sub-menu-color: #000;
+
+// $current-item-color: $branding-color2; //Current menu color; //Current menu color
+
+
+
+// //
+// // Footer Nav Colors
+// //
+// $footer-nav-color: #000;
+// $footer-nav-color-hover:#000;
+// $footer-nav-bg: #888;
+
+
+// //
+// // Buttons Colors
+// //
+// $button-link-color:#fff;
+// $button-link-color-hover:rgb(66, 66, 66);
+
+// $button-bg-color:#536cf0;
+// $button-bg-color-hover:#cecece;
+
+// $button-border-color:#000;
+// $button-border-color-hover: #ccc #bbb #aaa;
+// $button-border-color-focus: #aaa #bbb #bbb;
+// $button-border-color-input: #ccc;
+// $button-border-color-abbr: #666;
+
+// $button-border-input: #ccc;
+// $button-border-abbr: #666;
+
+
+// //
+// // Inputs
+// //
+// $input-font: $copy-text-strong;
+// $input-text-size: 1.12rem;
+// $input-text-lh: 1.9rem;
+// $input-text-color: #000;
+// $input-text-color-focus:#fff;
+// $input-bg-color:#fff;
+// $input-bg-color-focus:#d4d4d4;
+// $input-border-color:$black;
+// $input-border-active-color:$branding-color1;
+
+
+// //
+// // ERROR Messajes
+// //
+// $error-bg-color: #cbcb18;
+// $error-border-color:$button-border-color;
+// $error-font-color:$text-color;
+
+// //
+// // Border Colors
+// //
+// $border-color-medium: $gray200;
+// $border-color-bright: $gray400;
+// $border-color-dark: $gray600;

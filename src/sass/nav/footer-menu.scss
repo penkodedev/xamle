@@ -1,0 +1,25 @@
+.footer-menu {
+    display: flex;
+    align-items: center;
+    margin: 0;
+
+    ul.menu-list {
+        list-style: none;
+        display: flex;
+        padding: 0;
+        margin: 0;
+
+        a {
+            font-size: 0.9em;
+            color: #000;
+            text-decoration: none;
+            margin: 10px;
+            position: relative; // Para que funcione el ::after
+            padding-bottom: 10px;
+
+            &:hover {
+                color: rgb(97, 93, 107);
+            }
+        }
+    }
+}

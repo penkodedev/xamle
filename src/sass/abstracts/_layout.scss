@@ -1,0 +1,39 @@
+///////////////////////////////////
+//                      
+//         LAY OUT SPECS
+//
+///////////////////////////////////
+
+//
+// BORDER RADIUS
+//
+$border-radius-l:0.2em;
+$border-radius-m:0.4em;
+$border-radius-x:1.2em;
+$border-radius-xx:2em;
+
+//
+// BORDER WIDTH
+//
+$border-l:0.010em;
+$border-m:0.150em;
+$border-x:0.200em;
+$border-xx:0.300em;
+
+
+//
+// PADDINGS
+//
+$padding10:10px;
+$padding20:20px;
+$padding30:30px;
+$padding40:40px;
+$padding50:50px;
+$padding60:60px;
+
+.padd10 {padding: $padding10;}
+.padd20 {padding: $padding20;}
+.padd30 {padding: $padding30;}
+.padd40 {padding: $padding40;}
+.padd50 {padding: $padding50;}
+.padd60 {padding: $padding60;}

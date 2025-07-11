@@ -1,0 +1,93 @@
+///////////////////////////////////
+//                      
+//    TYPOGRAPHY FONTS & SIZES
+//
+///////////////////////////////////
+
+
+//
+// MAIN TEXT
+//
+$text-font: 'Montserrat-Light', Helvetica, Arial, sans-serif;
+$text-font-strong: 'Montserrat-Bold', Helvetica, Arial, sans-serif;
+$text-size: 1.14rem;
+$text-lh: 1.55;
+$text-margin: 0 0 1em 0;
+
+
+
+//
+// TEXT WEIGHTS
+//
+$light: 300;
+$normal: 400;
+$semibold: 500;
+$bold: 800;
+$bolder: 900;
+
+
+//
+// HEADINGS
+//
+$heading-font: 'Montserrat-Bold', Helvetica, Arial, sans-serif;
+$heading-weight: normal;
+$heading-margin: 0px 0px 0px 0px;
+$h1-size: calc(2.8rem + 0.1vw);
+$h2-size: calc(2.1rem + 0.5vw);
+$h3-size: calc(1.5rem + 0.5vw);
+$h4-size: calc(1.2rem + 0.5vw);
+$h5-size: calc(1rem + 0.5vw);
+$h6-size: calc(0.8rem + 0.5vw);
+$heading-letter-spacing: -0.08rem; //****** BIG headings letter spacing *****//
+
+
+//
+// PAGE TITLES
+//
+$page-title-font: 'Montserrat-Bold', Helvetica, Arial, sans-serif;
+$page-title-font-size:calc(2rem + 2.5vmin);
+$page-title-weight: normal;
+$page-title-margin: 0px;
+$page-title-letter-spacing: -0.27rem;
+$page-title-lh:calc(2.4rem + 3.5vmin);
+
+//
+// MENU FONTS
+//
+$menu-font: 'Futura-Regular', Helvetica, Arial, sans-serif;
+$menu-size: 1.2rem;
+
+
+//
+// ARTICLE LINK
+//
+$article-link-font-weight: 300;
+$article-link-decoration:underline;
+
+
+//
+// SECOND LEVEL LINK SIZE and HEIGHT
+//
+$second-level-link-size: (0.90em);
+$second-level-link-height: (1em);
+
+
+//
+// CAPTIONS
+//
+$caption-color: #000;
+$caption-weight: bold;
+$caption-margin: -5px 0px 10px 0px;
+$caption-letter-spacing: -0.06rem;
+$caption-align: left;
+
+//
+// MONO
+//
+$mono: "Source Code Pro", Courier, mono;
+
+
+//
+// PREFORMATED TEXT
+//
+$pre: "Courier", Courier, monospace;

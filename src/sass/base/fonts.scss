@@ -1,0 +1,188 @@
+// //************************ COPY TEXT ***************************
+
+
+// // p { @include copy-text;
+// //     //text-align: justify; //In case you need justify
+// //     //hyphens: auto; //In case you need hyphenation
+// // }
+
+// // p b { @include copy-text-strong;
+// //     //text-align: justify; //In case you need justify
+// //     //hyphens: auto; //In case you need hyphenation
+// // }
+
+// //************************ HEADINGS ************************
+
+// h1,h2,h3,h4,h5,h6 {@include heading;}
+
+// h1 {font-size: $h1-size; font-weight: $heading-weight; padding-bottom: $padding-l; line-height:$h1-size;}
+// h2 {font-size: $h2-size; font-weight: $heading-weight; padding-bottom: $padding-l; line-height:$h2-size;}
+// h3 {font-size: $h3-size; font-weight: $heading-weight; padding-bottom: $padding-l/1.8; line-height:$h3-size;}
+// h4 {font-size: $h4-size; font-weight: $heading-weight; padding-bottom: $padding-l/2.0; line-height:$h4-size + 0.1em;}
+// h5 {font-size: $h5-size; font-weight: $heading-weight; padding-bottom: $padding-l/2.1; line-height:$h5-size + 0.1em;}
+// h6 {font-size: $h6-size; font-weight: $heading-weight; padding-bottom: $padding-l/2.8; line-height:$h6-size + 0.1em;}
+
+
+// h1.page-title {
+// 	@include page-title;
+// }
+
+// .page-title .term-name {
+// 	font:$heading-font;
+//     font-size: $text-size;
+// }
+
+// //******************** LISTS ARTICLE ************************
+
+// article ul {
+//     font-family: $text-font;
+//     font-size: $text-size;
+//     color: $text-color;
+//     list-style-type: none;
+//     margin: 25px 0 0 20px;
+
+//     li {
+//         max-width: 800px;
+//         line-height: $text-lh;
+//         margin-bottom: 20px;
+//     }
+
+//     li:before {
+//         content: "\f0c8";
+//         font-family: "FontAwesome";
+//         font-size: 0.84em;
+//         color: #4a4a4a;
+//         padding: 0 10px 0 0;
+        
+//         a {
+//             color: $article-link-color;
+//         }
+//     }
+// }
+
+// article ol {
+// 	list-style: none;
+// 	counter-reset: my-awesome-counter;
+
+// 	li {
+// 		counter-increment: my-awesome-counter;
+// 		margin: 0.25rem;
+// 	}
+
+// 	li::before {
+// 		content: counter(my-awesome-counter);
+// 		display: inline-flex;
+// 		justify-content: center;
+// 		align-items: center;
+// 		background: $branding-color1;
+// 		width: 2em;
+// 		height: 2em;
+// 		border-radius: 50%;
+// 		color: white;
+// 		margin-right: 0.5em;
+// 	}
+
+// 	ol ol li::before {
+// 		background: $branding-color2;
+// 	}
+
+// 	ol ol ol li::before {
+// 		background: $branding-color3;
+// 	}
+// }
+
+// //******************** BLOCKQUOTE ************************
+
+// blockquote {
+//     display: flex;
+//     flex-direction: column;
+//     border-left: 6px solid $quote-border-color;
+//     margin: 40px auto 40px 20px;
+//     padding: 40px;
+//     max-width: 70%;
+	
+// 	cite {
+// 		margin: 36px 0 0 0;
+// 	}
+	
+// 	@media screen and (max-width: 800px) {
+// 		max-width: 100%;
+// 		margin: 40px auto 40px 0;
+// 		padding: 10px;
+// 	}
+// }
+
+// blockquote p {
+//     font: italic $text-size "Georgia", Times, Times New Roman, Palatino, serif;
+//     font-size: 1.4em;
+//     line-height: 1.4em;
+//     color: $black;
+//     text-indent: 1.7em; /*Text indent to fit quote icon size*/
+//     position: relative;
+// 	margin: 0;
+	
+// 	@media screen and (max-width: 800px) {
+// 		font-size: 1.3em;
+//     	line-height: 1.24em;
+// 	}
+
+//     &:before {
+//         position: absolute;
+//         content: open-quote;
+//         font: italic $text-size "Georgia", Times, Times New Roman, Palatino, serif;
+//         font-size: 3em;
+//         font-weight: bold;
+//         color: $black;
+//         top: -10px;
+//         left: -40px; /*To match text indent position*/
+//     }
+	
+// 	&:after {
+//         content: close-quote;  
+// 	}
+// }
+
+// //******************** CITE ************************
+// cite {
+//     font-family: $text-font;
+//     font-size: 1em;
+//     font-style: normal;
+//     color:$black;
+//     padding: 2px 8px;
+//     margin-bottom: 0px;
+// }
+
+
+// //******************** PRE ************************
+
+// pre {
+// 	font:$pre;
+// 	color: $text-color;
+// 	background:$branding-color3;
+// 	border: 1px solid $border-color-medium;
+// 	margin: 40px 0px 40px 0px !important;
+// 	padding:$padding-xx;
+//     white-space: pre-wrap;
+// }
+// pre a {
+// 	color: $link-color;
+// }
+// pre a:hover {
+// 	color: $link-color-hover;
+// }
+
+// //******************** CODE ************************
+
+// .wp-block-code {
+// 	color: #4ae044;
+// 	background: #2d342a;
+// }
+// //******************** CAPTIONS ************************
+
+// captions,
+// figcaption,
+// p.wp-caption-text,
+// .wp-block-image {
+//     @include caption;
+// }
+

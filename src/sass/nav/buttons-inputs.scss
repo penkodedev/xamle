@@ -1,0 +1,108 @@
+/*
+--------------------------------------------------------------------
+                          @BUTTONS AND INPUTS
+--------------------------------------------------------------------
+*/
+:root {
+  --primary: #FFB41D;
+  --primary-hover: #b1b1b1;
+  --black: #000;
+  --gray: #5E5C5C;
+  --gray-light: #DBDBDB;
+  --radius: 12px;
+}
+
+/********************** Inputs y textarea **********************/
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  width: 97%;
+  padding: 16px;
+  font-size: 1em;
+  color: var(--gray);
+  margin: 0 0 16px 0;
+  background-color: #fff;
+  border: 3px solid var(--gray-light);
+  border-radius: var(--radius);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--gray);
+  transition: opacity 0.3s ease;
+}
+
+
+input:focus::placeholder,
+textarea:focus::placeholder {
+  opacity: 0;
+}
+
+
+/**************************** Botones ****************************/
+button,
+.wp-block-button__link,
+input[type="submit"] {
+  font-family: 'futura-regular', sans-serif;
+  font-size: 1.1em;
+  font-weight: 800;
+  color: #000;
+  display: inline-block;
+  padding: 8px 40px;
+  background-color: var(--primary);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+button:hover,
+.wp-block-button__link:hover,
+input[type="submit"]:hover {
+  background-color: var(--primary-hover);
+  color: #5E5C5C;
+}
+
+button:active,
+input[type="submit"]:active {
+  transform: scale(0.98);
+}
+
+// *********** SCROLL TO TOP **************************
+.scroll-top-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  padding: 0.5rem 1rem;
+  font-size: 1.25rem;
+  background-color:#444;
+  color: rgb(255, 255, 255);
+  border: 1px solid var(--gray);
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateX(100px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  z-index: 1000;
+
+  &.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  &:hover {
+    background-color:#fff ;
+    color: #444;
+  }
+}

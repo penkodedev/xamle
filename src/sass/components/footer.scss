@@ -1,0 +1,22 @@
+.footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: black;
+    //min-height: 300px;
+    padding: 60px;
+
+    .main-menu {
+        margin: 0;
+    }
+
+    small {
+        margin: 0;
+        padding: 0;
+    }
+
+    .description {
+        color: rgb(131, 131, 131);
+        margin: 0;
+    }
+}

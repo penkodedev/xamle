@@ -1,0 +1,121 @@
+.resultado-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 30px;
+    margin: 30px 0 30px 0;
+    padding: 50px;
+    box-shadow: -1px -1px 25px -2px rgba(0, 0, 0, 0.23);
+    -webkit-box-shadow: -1px -1px 25px -2px rgba(0, 0, 0, 0.23);
+    -moz-box-shadow: -1px -1px 25px -2px rgba(0, 0, 0, 0.23);
+
+    p {
+        font-size: 1.2em;
+        margin: 0;
+    }
+}
+
+.texto-resultado {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.resultado-desc {
+    display: flex;
+    justify-content: center;
+    font-size: 1.7em;
+    text-align: center;
+    background-color: rgb(44, 44, 44);
+    color: #fff;
+    padding: 40px;
+    border-radius: 20px;
+    width: 80%;
+
+    p {
+        margin: 0;
+    }
+}
+
+.icono-alerta {
+    font-size: 1.45em;
+    color: #ffb41d;
+    
+}
+
+span.suma-puntos {
+    display: flex;
+    justify-content: center;
+    background-color: rgb(219, 219, 219);
+    padding: 8px 4px;
+    margin: 20px 0 0 0;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+
+    bold {
+        font-weight: 800;
+    }  
+}
+
+button.btn-sig-amb {
+    font-family: 'futura-regular', sans-serif;
+    font-size: 1.3em;
+    color: #000;
+    width: 100%;
+    padding: 16px;
+    margin: 0 auto; 
+}
+
+// ******************** MODAL FINAL *********************//
+.modal-final {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 1rem;
+    backdrop-filter: blur(5px);
+
+    p {
+        font-size: 1.1em;
+        line-height: 1.4em;
+        margin-bottom: 2rem;
+    }
+
+    h2 {
+        margin-bottom: 1rem;
+        font-size: 1.9rem;
+        color: #222;
+    }
+}
+
+.modal-final>div {
+    background: #fff;
+    border-radius: 15px;
+    padding: 2rem 2.5rem;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+}
+
+.botones-final {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+
+    button {
+        cursor: pointer;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        font-size: 1.3rem;
+        border-radius: 6px;
+        border: none;
+        transition: background-color 0.25s ease;
+    }
+}
+

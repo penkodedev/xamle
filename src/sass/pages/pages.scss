@@ -1,0 +1,21 @@
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 1240px;
+  padding-inline: 2rem;
+  margin: 0px auto 40px auto;
+  gap: 30px;
+}
+
+
+.page-encuesta .footer {
+  display: none;
+}
+
+.page-encuesta p.copy-encuesta {
+  font-size: 0.8em;
+  margin-top: 80px;
+  text-align: center;
+}
