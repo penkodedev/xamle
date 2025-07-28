@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   auto-push:
@@ -15,11 +16,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
       - name: Configure Git
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+      
+      - name: Show status
+        run: |
+          echo "=== Git Status ==="
+          git status
+          echo "=== Remote branches ==="
+          git branch -r
+          echo "=== Local branches ==="
+          git branch
       
       - name: Add changes
         run: git add .
@@ -30,7 +42,11 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "Auto commit $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            echo "Commit successful"
           fi
       
       - name: Push changes
-        run: git push 
+        run: |
+          echo "=== Attempting to push ==="
+          git push origin main
+          echo "Push completed" 
