@@ -22,7 +22,7 @@ export default function EncuestaSidebar({ ambitoNombre }: EncuestaSidebarProps) 
         const data: Ambito[] = await res.json();
         setAmbitos(data);
       } catch (error) {
-        if (error) return <p>Hubo un problema al cargar los datos. Intenta de nuevo.</p>;
+        if (error) return <p>Hubo un problema al cargar los datos. Intenta de nuevo por favor.</p>;
 
       }
     }
