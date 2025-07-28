@@ -2,8 +2,9 @@ name: Auto Push
 
 on:
   schedule:
-    # Ejecutar a las 18:40 UTC todos los días
-    - cron: '12 19 * * *'
+    # Ejecutar a las 9:00, 15:00 y 19:30 UTC todos los días
+    - cron: '0 9,15,19 * * *'
+    - cron: '30 19 * * *'
   workflow_dispatch: # Permite ejecutar manualmente
 
 permissions:
