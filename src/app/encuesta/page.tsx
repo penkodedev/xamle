@@ -1,7 +1,7 @@
 // app/encuesta/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import BodyClass from "@/utils/BodyClass";
 
 import Encuesta from "@/components/Encuesta";
@@ -14,28 +14,26 @@ export default function EncuestaPage() {
     title: "",
     description: "",
   });
-
-  // useEffect(() => {
-  //   fetch("http://encuestamad.local/wp-json/custom/v1/site-info")
-  //     .then((res) => res.json())
-  //     .then((data) => setSiteInfo({ title: data.title, description: data.description }))
-  //     .catch(() => setSiteInfo({ title: "", description: "" }));
-  // }, []);
+  const [mostrarMensajeFinal, setMostrarMensajeFinal] = useState(false);
 
   return (
     <>
       <BodyClass />
 
       <div className="layout-encuesta">
-        <aside>
-          <EncuestaSidebar ambitoNombre={ambitoActivo} />
-        </aside>
+        {!mostrarMensajeFinal && (
+          <aside>
+            <EncuestaSidebar ambitoNombre={ambitoActivo} />
+          </aside>
+        )}
 
         <article>
-          <Encuesta onAmbitoChange={setAmbitoActivo} />
-          <p className="copy-encuesta">
-          <SiteInfo />
-          </p>
+          <Encuesta
+            onAmbitoChange={setAmbitoActivo}
+            onMostrarMensajeFinalChange={setMostrarMensajeFinal}
+          />
+          <small className="copy-encuesta">
+          <SiteInfo /></small>
         </article>
       </div>
     </>

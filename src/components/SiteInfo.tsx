@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 type SiteInfoData = {
   title: string;
@@ -26,9 +27,23 @@ export default function SiteInfo() {
   // ******************** EMPIEZA EL RETURN PARA MONTAR EL HTML *******************************
   return (
     <>
-      &copy; {new Date().getFullYear()} {siteInfo.title}
+    
+      <div className="logo-footer-wrapper">
+        <Image
+          src="/logo-xamle-mad-footer.png"
+          alt="MAD África | Movimiento por la Acción y el Desarrollo de África"
+          width={133}
+          height={30}
+          priority
+          //className="logo-mad-footer"
+        />
+      </div>
+      <div>
+        &copy; {new Date().getFullYear()} {siteInfo.title}
         <br />
-      {siteInfo.description}
-    </>
+        {siteInfo.description}
+      </div>
+      
+      </>
   );
 }

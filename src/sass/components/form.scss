@@ -75,6 +75,7 @@ legend.racializada {
     margin: 20px 0 20px 0;
 }
 
+
 // ***************************** INPUTS & FORMS  ********************************* //
 input[type="radio"] {
     appearance: none;
@@ -157,6 +158,20 @@ button.btn-empezar {
     padding: 18px;
     margin: 20px 0 0 0;
     width: 100%;
+}
+
+p#form-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    color: rgba(255, 0, 0, 0.705);
+    background: #f2ffb6;
+    padding: 33px;
+    margin: 0 auto;
+    border-radius: 20px;
+    border: 3px solid #dbdbdb;
+    width: 70%;
 }
 
 

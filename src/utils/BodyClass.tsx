@@ -8,7 +8,6 @@ import { usePathname } from "next/navigation";
 const routeBodyClassMap: Record<string, string[]> = {
   "/contacto": ["page-contacto"],
   "/encuesta": ["page-encuesta", "encuesta"],
-  // Añade más rutas según necesites
 };
 
 const BodyClass = () => {

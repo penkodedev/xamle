@@ -3,11 +3,12 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import logoBase64 from "@/assets/madafrica-logo-base64";
+import type { Pregunta } from "@/types";
 
 export function generarPDF(
-  preguntas,
-  respuestasUsuario,
-  nombreColaborador
+  preguntas: Pregunta[],
+  respuestasUsuario: any,
+  nombreColaborador: string
 ) {
   const doc = new jsPDF();
 
@@ -62,11 +63,11 @@ export function generarPDF(
 
   // Puntuación total después de la tabla
   const puntuacionTotal = Object.values(respuestasUsuario).reduce(
-    (acc, peso) => acc + peso,
+    (acc: number, peso: any) => acc + (typeof peso === "number" ? peso : 0),
     0
   );
 
-  doc.text(`Puntuación total: ${puntuacionTotal}`, 14, doc.lastAutoTable.finalY + 10);
+  doc.text(`Puntuación total: ${puntuacionTotal}`, 14, (doc as any).lastAutoTable.finalY + 10);
 
   doc.save("resultados-encuesta-madafrica.pdf");
 }

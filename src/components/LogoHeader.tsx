@@ -17,20 +17,32 @@ export default function LogoHeader() {
       
   }, []);
 
-  return (
-    <div id="logo-container">
-      {/* <Link href="/"> */}
-        <Image
-          src="/madafrica-logo.png"
-          alt="Nivel de formación en educación antirracista y conciencia de su necesidad"
-          width={98}
-          height={42}
-          priority
-        />
-      {/* </Link> */}
-      <p className='header-desc'>
-        {description}
-      </p>
-    </div>
-  );
+ return (
+  <div id="logo-container">
+    <Image
+      src="/xamle-logo.png"
+      alt="Autodiagnóstico antirracista para reflexionar y transformar tu prácticadocente"
+      width={124}
+      height={63}
+      priority
+      className="logo-xamle-header"
+    />
+    
+     <div className="logo-mad-wrapper">
+      <Image
+        src="/madafrica-logo-small.png"
+        alt="MAD África | Movimiento por la Acción y el Desarrollo de África"
+        width={77}
+      height={63}
+        priority
+        className="logo-mad-header"
+      />
+     </div>
+
+    <p className="header-desc">
+      {description}
+    </p>
+  </div>
+);
+
 }

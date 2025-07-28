@@ -16,7 +16,7 @@ export default function EncuestaModalFinal({ preguntas, respuestasUsuario }: Pro
   const router = useRouter();
 
   function handleDescargarPDF() {
-    generarPDF(preguntas, respuestasUsuario);
+    //generarPDF(preguntas, respuestasUsuario);
     setTimeout(() => setFase(2), 600); // da tiempo a que inicie la descarga
   }
 

@@ -71,7 +71,9 @@ button:hover,
 .wp-block-button__link:hover,
 input[type="submit"]:hover {
   background-color: var(--primary-hover);
-  color: #5E5C5C;
+  color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 button:active,

@@ -14,8 +14,18 @@ main {
   display: none;
 }
 
-.page-encuesta p.copy-encuesta {
+.page-encuesta .copy-encuesta {
+  color: #908f8f;
   font-size: 0.8em;
   margin-top: 80px;
   text-align: center;
+}
+
+.page-encuesta .encuesta-container {
+  margin-bottom: 50px;
+}
+
+.page-encuesta .logo-footer-wrapper {
+  display: flex;
+  justify-content: center;
 }

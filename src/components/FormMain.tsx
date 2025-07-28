@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, ChangeEvent, FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 
 type FormData = {
   nombre: string;
@@ -20,11 +21,13 @@ const generoOptions = [
   'Mujer',
   'Hombre',
   'No binario',
-  'Prefiero no responder'];
+  'Prefiero no responder'
+];
 
 const etniaOptions = [
   'Persona blanca',
-  'Persona racializada'];
+  'Persona racializada'
+];
 
 const etniaDropdownOptions = [
   'Afrodescendiente',
@@ -34,7 +37,8 @@ const etniaDropdownOptions = [
   'Indígena',
   'Latino',
   'Pueblo Originário',
-  'Prefiero no responder'];
+  'Prefiero no responder'
+];
 
 const colectivoOptions = [
   'Docente en activo (etapas infantil o primaria)',
@@ -43,12 +47,14 @@ const colectivoOptions = [
   'Estudiante de educación',
   'Estudiante de otras disciplinas',
   'Educadora/e/or en el ámbito no formal o informal',
-  'Otros'];
+  'Otros'
+];
 
 const tipoCentroOptions = [
   'Centro Público',
   'Centro Concertado',
-  'Centro Privado'];
+  'Centro Privado'
+];
 
 export default function FormMain() {
   const [form, setForm] = useState<FormData>({
@@ -66,24 +72,40 @@ export default function FormMain() {
   });
 
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({
       ...prev,
-      [name]: name === 'edad' ? (value === '' ? '' : Number(value)) : value,
+      [name]: name === 'edad' ? (value === '' ? '' : value) : value,
     }));
   };
 
   const validarFormulario = () => {
     if (!form.nombre.trim()) return 'El nombre es obligatorio';
     if (!form.email.trim()) return 'El email es obligatorio';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return 'El email no es válido';
     if (!form.genero.trim()) return 'El género es obligatorio';
     if (!form.etnia.trim()) return 'La identidad étnica es obligatoria';
     if (!form.colectivo.trim()) return 'El colectivo es obligatorio';
     if (!form.pais.trim()) return 'El país es obligatorio';
     if (!form.ciudad.trim()) return 'La ciudad es obligatoria';
     if (!form.tipoCentro.trim()) return 'El tipo de centro es obligatorio';
+
+    // Validación de edad robusta
+    const edadNum = Number(form.edad);
+    if (
+      form.edad === '' ||
+      isNaN(edadNum) ||
+      !Number.isFinite(edadNum) ||
+      edadNum < 0 ||
+      edadNum > 120
+    ) {
+      return 'La edad debe ser un número válido entre 0 y 120';
+    }
 
     if (
       form.etnia === 'Persona racializada' &&
@@ -92,7 +114,6 @@ export default function FormMain() {
     ) {
       return 'Debes especificar el detalle de tu identidad étnica o describirla';
     }
-
     return null;
   };
 
@@ -106,12 +127,13 @@ export default function FormMain() {
     }
 
     setError(null);
+    setIsSubmitting(true);
 
     const payload = {
       nombre: form.nombre,
       email: form.email,
       genero: form.genero,
-      edad: typeof form.edad === 'number' ? form.edad : null,
+      edad: Number(form.edad),
       identidad_etnica: form.etnia,
       sub_etnias: form.etniaDetalles ? [form.etniaDetalles] : [],
       otra_etnia: form.etniaOtra,
@@ -119,7 +141,7 @@ export default function FormMain() {
       pais: form.pais,
       ciudad: form.ciudad,
       tipo_centro: form.tipoCentro,
-      respuestas: [], // <-- insertar aquí las respuestas reales
+      respuestas: [],
     };
 
     try {
@@ -141,17 +163,20 @@ export default function FormMain() {
         localStorage.setItem('colaboradorId', data.id.toString());
       }
 
-      window.location.href = '/encuesta';
+      setSuccess(true);
+      setTimeout(() => {
+        router.push('/encuesta');
+      }, 1200);
     } catch (error) {
       setError('Falló el envío. Intenta más tarde.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-
-  
   // ************** EMPIEZA EL RETURN PARA MONTAR EL HTML *************************//
   return (
-    <form className="form-main" onSubmit={handleSubmit}>
+    <form className="form-main" onSubmit={handleSubmit} aria-describedby={error ? "form-error" : undefined}>
       <fieldset>
         <h1>Datos Personales</h1>
         <small>Todos los campos son obligatorios</small>
@@ -170,7 +195,14 @@ export default function FormMain() {
         <legend>¿Cómo te defines desde tu identidad de género?</legend>
         {generoOptions.map(option => (
           <label key={option} style={{ marginRight: '1rem' }}>
-            <input type="radio" name="genero" value={option} checked={form.genero === option} onChange={handleChange} required />
+            <input
+              type="radio"
+              name="genero"
+              value={option}
+              checked={form.genero === option}
+              onChange={handleChange}
+              required
+            />
             {option}
           </label>
         ))}
@@ -180,7 +212,14 @@ export default function FormMain() {
         <legend>¿Cómo te defines desde tu identidad étnica o racial?</legend>
         {etniaOptions.map(option => (
           <label key={option} style={{ marginRight: '1rem' }}>
-            <input type="radio" name="etnia" value={option} checked={form.etnia === option} onChange={handleChange} required />
+            <input
+              type="radio"
+              name="etnia"
+              value={option}
+              checked={form.etnia === option}
+              onChange={handleChange}
+              required
+            />
             {option}
           </label>
         ))}
@@ -227,10 +266,13 @@ export default function FormMain() {
         </select>
       </fieldset>
 
-      {error && <p style={{ color: 'red', fontWeight: 'bold' }}>{error}</p>}
+      {error && <p id="form-error" style={{ color: 'red', fontWeight: 'bold' }} role="alert">{error}</p>}
+      {success && <p style={{ color: 'green', fontWeight: 'bold' }} role="status">¡Enviado correctamente! Redirigiendo...</p>}
 
       <div className="empezar-container">
-        <button className="btn-empezar" type="submit">Empezar la encuesta</button>
+        <button className="btn-empezar" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Enviando...' : 'Empezar la encuesta'}
+        </button>
       </div>
     </form>
   );

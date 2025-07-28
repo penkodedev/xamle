@@ -4,11 +4,10 @@
     align-items: center;
     padding: 20px 40px;
     background-color: #fff;
-    border-bottom: 1px solid #ADADAD;
+    border-bottom: 1px solid #d6d6d6;
     height: 100px;
     margin: 0;
-    //border-bottom: 1px solid rgb(196, 196, 196);
-
+;
     .nav-header {
         display: flex;
     }
@@ -22,7 +21,7 @@
 .header #logo-container {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    
     margin: 0;
 }
 
@@ -38,11 +37,24 @@
 }
 
 .header-desc {
+    display: flex;
+    align-items: center;
     font-family: 'futura-regular', sans-serif;
     font-size: 1em;
     line-height: 1.2em;
     max-width: 400px;
     margin: -10px 0 0 16px;
-    border-left: 1px solid rgb(131, 131, 131);
-    padding-left: 30px;
+    // border-left: 1px solid rgb(204, 204, 204);
+    // padding-left: 30px;
+    height: 60px;
+}
+
+
+.logo-xamle-header {
+    margin-right: 25px;
+}
+
+.logo-mad-header {
+    border-left: 1px solid rgb(204, 204, 204);
+    padding-left: 14px;
 }
