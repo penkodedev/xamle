@@ -163,13 +163,10 @@ export default function FormMain() {
         localStorage.setItem('colaboradorId', data.id.toString());
       }
 
-      setSuccess(true);
-      setTimeout(() => {
-        router.push('/encuesta');
-      }, 1200);
+      // Redirigir directamente sin mensaje de éxito
+      router.push('/encuesta');
     } catch (error) {
       setError('Falló el envío. Intenta más tarde.');
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -267,11 +264,19 @@ export default function FormMain() {
       </fieldset>
 
       {error && <p id="form-error" style={{ color: 'red', fontWeight: 'bold' }} role="alert">{error}</p>}
-      {success && <p style={{ color: 'green', fontWeight: 'bold' }} role="status">¡Enviado correctamente! Redirigiendo...</p>}
 
       <div className="empezar-container">
         <button className="btn-empezar" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Enviando...' : 'Empezar la encuesta'}
+          {isSubmitting ? (
+            <>
+              <svg className="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <span>Enviando formulario...</span>
+            </>
+          ) : (
+            'Empezar la encuesta'
+          )}
         </button>
       </div>
     </form>

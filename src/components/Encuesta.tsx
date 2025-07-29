@@ -163,7 +163,7 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange }
   if (cargando) return (
     <div className="loader-overlay">
       <div className="spinner" />
-      <p>Cargando...</p>
+      <p>Cargando encuesta...</p>
     </div>
   );
   
@@ -242,8 +242,8 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange }
             <p className="pregunta-bold">{preguntasAmbito[preguntaSlideIndex].pregunta}</p>
 
             <div>
-              {preguntasAmbito[preguntaSlideIndex].respuestas.map(r => (
-                <label key={r.id}>
+              {preguntasAmbito[preguntaSlideIndex].respuestas.map((r, index) => (
+                <label key={`respuesta-${preguntasAmbito[preguntaSlideIndex].id}-${r.id}-${index}`}>
                   <input
                     type="radio"
                     name={`respuesta-${preguntasAmbito[preguntaSlideIndex].id}`}
@@ -264,7 +264,7 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange }
               <ul className="pagination">
                 {preguntasAmbito.map((pregunta, index) => (
                   <li
-                    key={pregunta.id}
+                    key={`pagination-${pregunta.id}-${index}`}
                     className={index === preguntaSlideIndex ? "page current" : "page"}
                   >
                     {String(index + 1).padStart(2, "0")}
