@@ -35,6 +35,7 @@ npm run dev
 ```
 
 
+```mermaid
 sequenceDiagram
     participant Usuario
     participant Navegador
@@ -58,3 +59,4 @@ sequenceDiagram
     App->>WP_API: POST /custom/v1/colaboradores (envía respuestas)
     WP_API-->>App: Confirma recepción
     App->>Usuario: Muestra mensaje final
+```
