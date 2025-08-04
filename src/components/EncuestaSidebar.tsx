@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 
 type Ambito = {
   id: number;
@@ -9,29 +9,27 @@ type Ambito = {
 };
 
 type EncuestaSidebarProps = {
-  ambitoNombre: string; // espero que sea el slug para identificar
+  ambitoNombre: string;
+  ambitos: Ambito[]; // Recibir datos como props
+  cargando?: boolean; // Estado de carga del padre
 };
 
-export default function EncuestaSidebar({ ambitoNombre }: EncuestaSidebarProps) {
-  const [ambitos, setAmbitos] = useState<Ambito[]>([]);
+// Memoizar el componente para evitar re-renders innecesarios
+const EncuestaSidebar = React.memo(({ ambitoNombre, ambitos, cargando = false }: EncuestaSidebarProps) => {
+  // Memoizar el ámbito activo para evitar recálculos
+  const ambitoActivo = useMemo(() => 
+    ambitos.find(a => a.slug === ambitoNombre || a.nombre === ambitoNombre),
+    [ambitos, ambitoNombre]
+  );
 
-  useEffect(() => {
-    async function cargarAmbitos() {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/custom/v1/ambitos`);
-        const data: Ambito[] = await res.json();
-        setAmbitos(data);
-      } catch (error) {
-        if (error) return <p>Hubo un problema al cargar los datos. Intenta de nuevo por favor.</p>;
+  // No mostrar nada si está cargando o no hay datos
+  if (cargando || ambitos.length === 0) {
+    return null;
+  }
 
-      }
-    }
-    cargarAmbitos();
-  }, []);
-
-  const ambitoActivo = ambitos.find(a => a.slug === ambitoNombre || a.nombre === ambitoNombre);
-
-  if (!ambitoActivo) return //<p>Ámbito no encontrado.</p>;
+  if (!ambitoActivo) {
+    return null; // No mostrar nada si no encuentra el ámbito
+  }
 
   return (
     <aside className="encuesta-sidebar">
@@ -46,4 +44,9 @@ export default function EncuestaSidebar({ ambitoNombre }: EncuestaSidebarProps) 
       </div>
     </aside>
   );
-}
+});
+
+// Añadir displayName para debugging
+EncuestaSidebar.displayName = 'EncuestaSidebar';
+
+export default EncuestaSidebar;

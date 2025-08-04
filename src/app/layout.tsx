@@ -13,8 +13,8 @@ export const metadata = {
   description: "Nivel de formación en educación antirracista y conciencia de su necesidad",
   keywords: ["educación", "antirracismo", "encuesta", "formación", "XAMLE"],
   author: "Paulo Ramalho | penkode.com",
-  viewport: "width=device-width, initial-scale=1",
   robots: "index, follow",
+  metadataBase: new URL("https://xamle.com"), // <-- aquí
   openGraph: {
     title: "XAMLE | Encuesta formación en educación",
     description: "Participa en nuestra encuesta sobre formación en educación antirracista.",
@@ -24,7 +24,7 @@ export const metadata = {
       {
         url: "/logo-xamle-mad-footer.png",
         width: 1200,
-        height: 630,  // Ancho y alto de la imagen
+        height: 630,
         alt: "Logo XAMLE"
       }
     ]
@@ -36,13 +36,17 @@ export const metadata = {
     images: [
       "/logo-xamle-mad-footer.png"
     ]
-  },
+  }
+};
+
+// Exporta viewport por separado (Next.js 13+)
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
   themeColor: "#ffffff",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
-
-// *************** Empieza el return del layout general *************** //
   return (
     <html lang="es">
       <body>

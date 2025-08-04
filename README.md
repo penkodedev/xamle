@@ -33,3 +33,28 @@ cd xamle
 npm install
 npm run dev
 ```
+
+
+sequenceDiagram
+    participant Usuario
+    participant Navegador
+    participant App
+    participant WP_API as WordPress API
+
+    Usuario->>Navegador: Accede a la web
+    Navegador->>App: Monta la aplicación
+    App->>WP_API: GET /custom/v1/preguntas
+    WP_API-->>App: Devuelve preguntas y ámbitos
+    App->>Usuario: Muestra primera pregunta
+
+    loop Por cada ámbito
+        Usuario->>App: Responde pregunta
+        App->>App: Guarda respuesta
+        App->>Usuario: Muestra siguiente pregunta o resultado del ámbito
+        Usuario->>App: Click "Siguiente ámbito"
+    end
+
+    Usuario->>App: Click "Finalizar encuesta"
+    App->>WP_API: POST /custom/v1/colaboradores (envía respuestas)
+    WP_API-->>App: Confirma recepción
+    App->>Usuario: Muestra mensaje final

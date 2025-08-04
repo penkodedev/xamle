@@ -10,6 +10,13 @@ import SiteInfo from "@/components/SiteInfo";
 
 export default function EncuestaPage() {
   const [ambitoActivo, setAmbitoActivo] = useState<string>("");
+  const [sidebarData, setSidebarData] = useState<{
+    ambitos: any[];
+    cargando: boolean;
+  }>({
+    ambitos: [],
+    cargando: true
+  });
   const [siteInfo, setSiteInfo] = useState<{ title: string; description: string }>({
     title: "",
     description: "",
@@ -23,7 +30,11 @@ export default function EncuestaPage() {
       <div className="layout-encuesta">
         {!mostrarMensajeFinal && (
           <aside>
-            <EncuestaSidebar ambitoNombre={ambitoActivo} />
+            <EncuestaSidebar 
+              ambitoNombre={ambitoActivo}
+              ambitos={sidebarData.ambitos}
+              cargando={sidebarData.cargando}
+            />
           </aside>
         )}
 
@@ -31,6 +42,7 @@ export default function EncuestaPage() {
           <Encuesta
             onAmbitoChange={setAmbitoActivo}
             onMostrarMensajeFinalChange={setMostrarMensajeFinal}
+            onSidebarDataChange={setSidebarData}
           />
           <small className="copy-encuesta">
           <SiteInfo /></small>
