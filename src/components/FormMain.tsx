@@ -244,7 +244,7 @@ export default function FormMain() {
       </fieldset>
 
       <fieldset>
-        <legend>Selecciona el colectivo al que perteneces</legend>
+        <legend>Selecciona el colectivo docente al que perteneces</legend>
         <select name="colectivo" value={form.colectivo} onChange={handleChange} required>
           <option value="">Selecciona</option>
           {colectivoOptions.map(opt => (

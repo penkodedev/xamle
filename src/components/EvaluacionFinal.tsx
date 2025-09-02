@@ -15,25 +15,14 @@ type Pregunta = {
   respuestas: Respuesta[];
 };
 
-type Ambito = {
-  nombre: string;
-  area: string;
-  puntuacion: number;
-  puntuacionMaxima: number;
-};
-
 type EvaluacionFinalProps = {
-  ambitos: Ambito[];
   puntuacionFinal: number;
   puntuacionMaxima: number;
   preguntas: Pregunta[];
   respuestasUsuario: { [key: number]: number };
 };
 
-export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMaxima, preguntas, respuestasUsuario }: EvaluacionFinalProps) {
-  // Animaciones para ámbitos
-  const [animatedScores, setAnimatedScores] = useState<number[]>(ambitos.map(() => 0));
-  const [animatedPercents, setAnimatedPercents] = useState<number[]>(ambitos.map(() => 0));
+export default function EvaluacionFinal({ puntuacionFinal, puntuacionMaxima, preguntas, respuestasUsuario }: EvaluacionFinalProps) {
   // Animación para puntuación final
   const [animatedFinal, setAnimatedFinal] = useState(0);
   // Estado para mostrar la modal de despedida
@@ -67,42 +56,6 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
   const valoracionFinal = calcularValoracion(puntuacionFinal);
 
   useEffect(() => {
-    ambitos.forEach((ambito, idx) => {
-      let frame: number;
-      const duration = 1200;
-      const startTime = performance.now();
-      const animate = (now: number) => {
-        const elapsed = now - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        setAnimatedScores(prev => {
-          const next = [...prev];
-          next[idx] = Math.round(progress * ambito.puntuacion);
-          return next;
-        });
-        setAnimatedPercents(prev => {
-          const next = [...prev];
-          const percent = ambito.puntuacionMaxima > 0 ? (ambito.puntuacion / ambito.puntuacionMaxima) * 100 : 0;
-          next[idx] = progress * percent;
-          return next;
-        });
-        if (progress < 1) {
-          frame = requestAnimationFrame(animate);
-        } else {
-          setAnimatedScores(prev => {
-            const next = [...prev];
-            next[idx] = ambito.puntuacion;
-            return next;
-          });
-          setAnimatedPercents(prev => {
-            const next = [...prev];
-            next[idx] = (ambito.puntuacion / ambito.puntuacionMaxima) * 100;
-            return next;
-          });
-        }
-      };
-      frame = requestAnimationFrame(animate);
-      return () => cancelAnimationFrame(frame);
-    });
     // Animación para puntuación final
     let frameFinal: number;
     const durationFinal = 1500;
@@ -120,7 +73,7 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
     frameFinal = requestAnimationFrame(animateFinal);
     return () => cancelAnimationFrame(frameFinal);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ambitos, puntuacionFinal]);
+  }, [puntuacionFinal]);
 
   function handleDescargarPDF() {
     // Llamar a generarPDF con los datos correctos
@@ -136,25 +89,7 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
   // ********************** EMPEZAMOS EL RETURN PARA MONTAR EL HTML ************************************* //
   return (
     <section className="resultado-container">
-      <h2>Evaluación Final</h2>
-      <ul>
-        {ambitos.map((ambito, idx) => (
-          <li key={ambito.nombre}>
-            <span>{ambito.nombre} - {ambito.area}</span>
-            <div className="progress-bar-animada-container">
-              <div
-                className="progress-bar-animada"
-                style={{ 
-                  width: `${animatedPercents[idx]}%`,
-                  animation: 'none' // Desactivar la animación CSS automática
-                }}
-              />
-            </div>
-            <span className="score-animado">{animatedScores[idx]} / {ambito.puntuacionMaxima}</span>
-          </li>
-        ))}
-      </ul>
-      
+      <h1>Evaluación Final</h1>
       <div className="puntuacion-final">
         <strong className="score-animado final">Puntuación final: {animatedFinal} / {puntuacionMaxima}</strong>
       </div>
@@ -164,8 +99,8 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
         <span className="icono-alerta" aria-hidden="true">⚠️ {valoracionFinal.descripcion}</span>
       </div>
 
-      <p className="texto-placeholder">Aquí irá un texto explicativo sobre la evaluación final.</p>
-      <button className="btn-sig-amb"onClick={handleDescargarPDF}>Descarga tu evaluación detallada en PDF</button>
+      <p className="texto-eval-final">Aquí irá un texto explicativo sobre la evaluación final.</p>
+      <button className="btn-sig-amb"onClick={handleDescargarPDF}>Descarga en PDF tu evaluación detallada y recomendaciones</button>
       {mostrarModal && (
         <div className="modal-final">
           <div>

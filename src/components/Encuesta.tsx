@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useReducer, useCallback, useMemo } from "react";
 import ResultadoAmbito from "./ResultadoAmbito";
-import EncuestaModalFinal from "./EncuestaModalFinal";
 import EvaluacionAmbitos from "./EvaluacionAmbitos";
 import EvaluacionFinal from "./EvaluacionFinal";
-import EncuestaSidebar from "./EncuestaSidebar";
 import { motion, AnimatePresence } from "framer-motion";
 
 type Respuesta = {
@@ -22,12 +20,6 @@ type Pregunta = {
   respuestas: Respuesta[];
 };
 
-type EncuestaProps = {
-  onAmbitoChange?: (ambito: string) => void;
-  onMostrarMensajeFinalChange?: (mostrar: boolean) => void;
-  onSidebarDataChange?: (data: { ambitos: any[]; cargando: boolean }) => void;
-};
-
 type AmbitoAPI = {
   id: number;
   nombre: string;
@@ -36,55 +28,116 @@ type AmbitoAPI = {
   aspecto_evaluado: string;
 };
 
+type EncuestaProps = {
+  onAmbitoChange?: (ambito: string) => void;
+  onMostrarMensajeFinalChange?: (mostrar: boolean) => void;
+  onSidebarDataChange?: (data: { ambitos: any[]; cargando: boolean }) => void;
+};
+
+// --- Lógica del Reducer ---
+type EncuestaState = {
+  preguntas: Pregunta[];
+  ambitos: string[];
+  ambitosAPI: AmbitoAPI[];
+  cargando: boolean;
+  ambitoActivoIndex: number;
+  preguntaSlideIndex: number;
+  vista: 'preguntas' | 'evaluacionAmbitos' | 'evaluacionFinal';
+  respuestasUsuario: { [key: number]: number };
+};
+
+type Action =
+  | { type: 'CARGA_DATOS_INICIO' }
+  | { type: 'CARGA_DATOS_EXITO'; payload: { preguntas: Pregunta[]; ambitos: string[]; ambitosAPI: AmbitoAPI[] } }
+  | { type: 'CARGA_DATOS_ERROR' }
+  | { type: 'RESPONDER_PREGUNTA'; payload: { preguntaId: number; peso: number } }
+  | { type: 'SIGUIENTE_PREGUNTA' }
+  | { type: 'PREGUNTA_ANTERIOR' }
+  | { type: 'SIGUIENTE_AMBITO' }
+  | { type: 'VER_EVALUACION_AMBITOS' }
+  | { type: 'VER_EVALUACION_FINAL' };
+
+const initialState: EncuestaState = {
+  preguntas: [],
+  ambitos: [],
+  ambitosAPI: [],
+  cargando: true,
+  ambitoActivoIndex: 0,
+  preguntaSlideIndex: 0,
+  vista: 'preguntas',
+  respuestasUsuario: {},
+};
+
+function encuestaReducer(state: EncuestaState, action: Action): EncuestaState {
+  switch (action.type) {
+    case 'CARGA_DATOS_INICIO':
+      return { ...state, cargando: true };
+    case 'CARGA_DATOS_EXITO':
+      return {
+        ...initialState,
+        cargando: false,
+        preguntas: action.payload.preguntas,
+        ambitos: action.payload.ambitos,
+        ambitosAPI: action.payload.ambitosAPI,
+      };
+    case 'CARGA_DATOS_ERROR':
+      return { ...initialState, cargando: false };
+    case 'RESPONDER_PREGUNTA':
+      return {
+        ...state,
+        respuestasUsuario: {
+          ...state.respuestasUsuario,
+          [action.payload.preguntaId]: action.payload.peso,
+        },
+      };
+    case 'SIGUIENTE_PREGUNTA': {
+      const preguntasAmbito = state.preguntas.filter(p => p.ambito.fase === state.ambitos[state.ambitoActivoIndex]);
+      const nuevoIndex = state.preguntaSlideIndex < preguntasAmbito.length ? state.preguntaSlideIndex + 1 : state.preguntaSlideIndex;
+      return { ...state, preguntaSlideIndex: nuevoIndex };
+    }
+    case 'PREGUNTA_ANTERIOR':
+      return { ...state, preguntaSlideIndex: Math.max(0, state.preguntaSlideIndex - 1) };
+    case 'SIGUIENTE_AMBITO':
+      return {
+        ...state,
+        ambitoActivoIndex: state.ambitoActivoIndex + 1,
+        preguntaSlideIndex: 0,
+      };
+    case 'VER_EVALUACION_AMBITOS':
+      return { ...state, vista: 'evaluacionAmbitos' };
+    case 'VER_EVALUACION_FINAL':
+      return { ...state, vista: 'evaluacionFinal' };
+    default:
+      return state;
+  }
+}
+
 export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange, onSidebarDataChange }: EncuestaProps) {
-  // Estados agrupados para mejor rendimiento
-  const [encuestaData, setEncuestaData] = useState({
-    preguntas: [] as Pregunta[],
-    ambitos: [] as string[],
-    ambitosAPI: [] as AmbitoAPI[],
-    cargando: true
-  });
-  
-  const [navegacion, setNavegacion] = useState({
-    ambitoActivoIndex: 0,
-    preguntaSlideIndex: 0,
-    vista: 'preguntas' as 'preguntas' | 'evaluacionAmbitos' | 'evaluacionFinal'
-  });
-  
-  const [respuestasUsuario, setRespuestasUsuario] = useState<{ [key: number]: number }>({});
-  const [mostrarModalFinal, setMostrarModalFinal] = useState(false);
+  const [state, dispatch] = useReducer(encuestaReducer, initialState);
+  const { preguntas, ambitos, ambitosAPI, cargando, ambitoActivoIndex, preguntaSlideIndex, vista, respuestasUsuario } = state;
 
   // Memoizar la función de carga de datos
   const cargarDatos = useCallback(async () => {
+    dispatch({ type: 'CARGA_DATOS_INICIO' });
     try {
-      setEncuestaData(prev => ({ ...prev, cargando: true }));
-      
       // Cargar preguntas y ámbitos en paralelo
       const [respPreguntas, resAmbitos] = await Promise.all([
         fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/custom/v1/preguntas`),
         fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/custom/v1/ambitos`)
       ]);
       
+      if (!respPreguntas.ok || !resAmbitos.ok) {
+        throw new Error('Fallo al cargar los datos de la encuesta');
+      }
+
       const datosPreguntas: Pregunta[] = await respPreguntas.json();
       const dataAmbitos: AmbitoAPI[] = await resAmbitos.json();
       const fases = Array.from(new Set(datosPreguntas.map(p => p.ambito.fase)));
 
-      setEncuestaData({
-        preguntas: datosPreguntas,
-        ambitos: fases,
-        ambitosAPI: dataAmbitos,
-        cargando: false
-      });
-      
-      setNavegacion(prev => ({
-        ...prev,
-        preguntaSlideIndex: 0,
-        ambitoActivoIndex: 0
-      }));
-      setRespuestasUsuario({});
+      dispatch({ type: 'CARGA_DATOS_EXITO', payload: { preguntas: datosPreguntas, ambitos: fases, ambitosAPI: dataAmbitos } });
     } catch (error) {
       console.error("Error cargando datos:", error);
-      setEncuestaData(prev => ({ ...prev, cargando: false }));
+      dispatch({ type: 'CARGA_DATOS_ERROR' });
     }
   }, []);
 
@@ -94,38 +147,24 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange, 
 
   // Memoizar cálculos costosos
   const preguntasAmbito = useMemo(() => 
-    encuestaData.preguntas.filter(p => p.ambito.fase === encuestaData.ambitos[navegacion.ambitoActivoIndex]),
-    [encuestaData.preguntas, encuestaData.ambitos, navegacion.ambitoActivoIndex]
+    preguntas.filter(p => p.ambito.fase === ambitos[ambitoActivoIndex]),
+    [preguntas, ambitos, ambitoActivoIndex]
   );
 
   const mostrarMensajeFinal = useMemo(() => 
-    navegacion.preguntaSlideIndex === preguntasAmbito.length,
-    [navegacion.preguntaSlideIndex, preguntasAmbito.length]
+    preguntaSlideIndex === preguntasAmbito.length && preguntasAmbito.length > 0,
+    [preguntaSlideIndex, preguntasAmbito.length]
   );
 
   // Memoizar callbacks para evitar re-renders
   const manejarRespuesta = useCallback((preguntaId: number, peso: number) => {
-    setRespuestasUsuario(prev => ({ ...prev, [preguntaId]: peso }));
+    dispatch({ type: 'RESPONDER_PREGUNTA', payload: { preguntaId, peso } });
   }, []);
-
-  const siguientePregunta = useCallback(() => {
-    if (navegacion.preguntaSlideIndex < preguntasAmbito.length - 1) {
-      setNavegacion(prev => ({ ...prev, preguntaSlideIndex: prev.preguntaSlideIndex + 1 }));
-    } else {
-      setNavegacion(prev => ({ ...prev, preguntaSlideIndex: preguntasAmbito.length }));
-    }
-  }, [navegacion.preguntaSlideIndex, preguntasAmbito.length]);
-
-  const preguntaAnterior = useCallback(() => {
-    if (navegacion.preguntaSlideIndex > 0) {
-      setNavegacion(prev => ({ ...prev, preguntaSlideIndex: prev.preguntaSlideIndex - 1 }));
-    }
-  }, [navegacion.preguntaSlideIndex]);
 
   const enviarRespuestasFinales = useCallback(async () => {
     try {
       const respuestasArray = Object.entries(respuestasUsuario).map(([preguntaId, peso]) => {
-        const pregunta = encuestaData.preguntas.find(p => p.id === parseInt(preguntaId));
+        const pregunta = preguntas.find(p => p.id === parseInt(preguntaId));
         const respuesta = pregunta?.respuestas.find(r => r.peso === peso);
         return {
           preguntaId: parseInt(preguntaId),
@@ -145,62 +184,48 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange, 
     } catch (error) {
       console.error("Error enviando respuestas finales:", error);
     }
-  }, [respuestasUsuario, encuestaData.preguntas]);
+  }, [respuestasUsuario, preguntas]);
 
-  const siguienteAmbito = useCallback(async () => {
-    if (navegacion.ambitoActivoIndex < encuestaData.ambitos.length - 1) {
-      setNavegacion(prev => ({
-        ...prev,
-        ambitoActivoIndex: prev.ambitoActivoIndex + 1,
-        preguntaSlideIndex: 0
-      }));
-    } else {
-      setNavegacion(prev => ({ ...prev, vista: 'evaluacionAmbitos' }));
-      await enviarRespuestasFinales();
-    }
-  }, [navegacion.ambitoActivoIndex, encuestaData.ambitos.length, enviarRespuestasFinales]);
-
-  const handleVerEvaluacionFinal = useCallback(() => {
-    setNavegacion(prev => ({ ...prev, vista: 'evaluacionFinal' }));
+  const siguientePregunta = useCallback(() => {
+    dispatch({ type: 'SIGUIENTE_PREGUNTA' });
   }, []);
 
-  const handleDescargarPDF = useCallback(() => {
-    alert('Descargar PDF (lógica pendiente)');
+  const preguntaAnterior = useCallback(() => {
+    dispatch({ type: 'PREGUNTA_ANTERIOR' });
+  }, []);
+
+  const siguienteAmbito = useCallback(async () => {
+    if (ambitoActivoIndex < ambitos.length - 1) {
+      dispatch({ type: 'SIGUIENTE_AMBITO' });
+    } else {
+      await enviarRespuestasFinales();
+      dispatch({ type: 'VER_EVALUACION_AMBITOS' });
+    }
+  }, [ambitoActivoIndex, ambitos.length, enviarRespuestasFinales]);
+
+  const handleVerEvaluacionFinal = useCallback(() => {
+    dispatch({ type: 'VER_EVALUACION_FINAL' });
   }, []);
 
   // Efectos optimizados
   useEffect(() => {
-    if (encuestaData.ambitos.length && onAmbitoChange) {
-      onAmbitoChange(encuestaData.ambitos[navegacion.ambitoActivoIndex]);
-    }
-  }, [encuestaData.ambitos, navegacion.ambitoActivoIndex, onAmbitoChange]);
+    onAmbitoChange?.(ambitos[ambitoActivoIndex]);
+  }, [ambitos, ambitoActivoIndex, onAmbitoChange]);
 
   useEffect(() => {
-    if (onMostrarMensajeFinalChange) {
-      onMostrarMensajeFinalChange(mostrarMensajeFinal);
-    }
-    
-    if (
-      mostrarMensajeFinal &&
-      navegacion.ambitoActivoIndex === encuestaData.ambitos.length - 1 &&
-      navegacion.vista === 'preguntas'
-    ) {
-      setNavegacion(prev => ({ ...prev, vista: 'evaluacionAmbitos' }));
+    onMostrarMensajeFinalChange?.(mostrarMensajeFinal);
+    if (mostrarMensajeFinal && ambitoActivoIndex === ambitos.length - 1 && vista === 'preguntas') {
       enviarRespuestasFinales();
+      dispatch({ type: 'VER_EVALUACION_AMBITOS' });
     }
-  }, [mostrarMensajeFinal, onMostrarMensajeFinalChange, navegacion.ambitoActivoIndex, encuestaData.ambitos.length, navegacion.vista, enviarRespuestasFinales]);
+  }, [mostrarMensajeFinal, onMostrarMensajeFinalChange, ambitoActivoIndex, ambitos.length, vista, enviarRespuestasFinales]);
 
   // Pasar datos al sidebar
   useEffect(() => {
-    if (onSidebarDataChange) {
-      onSidebarDataChange({
-        ambitos: encuestaData.ambitosAPI,
-        cargando: encuestaData.cargando
-      });
-    }
-  }, [encuestaData.ambitosAPI, encuestaData.cargando, onSidebarDataChange]);
+    onSidebarDataChange?.({ ambitos: ambitosAPI, cargando });
+  }, [ambitosAPI, cargando, onSidebarDataChange]);
 
-  if (encuestaData.cargando) return (
+  if (cargando) return (
     <div className="loader-overlay">
       <div className="spinner" />
       <p>Preparando encuesta...</p>
@@ -208,20 +233,14 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange, 
   );
   
   
-  if (!encuestaData.preguntas.length) return <p>No hay preguntas disponibles.</p>;
+  if (!preguntas.length) return <p>No hay preguntas disponibles.</p>;
 
-  const respuestasAmbito = preguntasAmbito
-    .map(p => respuestasUsuario[p.id])
-    .filter((peso): peso is number => peso !== undefined);
-  
-  
   // ********************** EMPEZAMOS EL RETURN PARA MONTAR EL HTML ************************************* //
-  if (navegacion.vista === 'evaluacionAmbitos') {
+  if (vista === 'evaluacionAmbitos' || vista === 'evaluacionFinal') {
     // Calcular datos de ámbitos cruzando con ambitosAPI
-    const ambitosData = encuestaData.ambitos
-      .map(nombre => {
-        const ambitoInfo = encuestaData.ambitosAPI.find(a => a.nombre === nombre || a.slug === nombre);
-        const preguntasDeAmbito = encuestaData.preguntas.filter(p => p.ambito.fase === nombre);
+    const ambitosData = ambitos.map(nombre => {
+        const ambitoInfo = ambitosAPI.find(a => a.nombre === nombre || a.slug === nombre);
+        const preguntasDeAmbito = preguntas.filter(p => p.ambito.fase === nombre);
         const puntuacion = preguntasDeAmbito.reduce((acc, p) => acc + (respuestasUsuario[p.id] || 0), 0);
         const puntuacionMaxima = preguntasDeAmbito.reduce((acc, p) => acc + Math.max(...p.respuestas.map(r => r.peso)), 0);
         return {
@@ -231,40 +250,24 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange, 
           puntuacionMaxima
         };
       });
-    return (
-      <EvaluacionAmbitos
-        ambitos={ambitosData}
-        onVerEvaluacionFinal={handleVerEvaluacionFinal}
-      />
-    );
-  }
 
-  if (navegacion.vista === 'evaluacionFinal') {
-    // Calcular datos de ámbitos y puntuación final
-    const ambitosData = encuestaData.ambitos
-      .map(nombre => {
-        const ambitoInfo = encuestaData.ambitosAPI.find(a => a.nombre === nombre || a.slug === nombre);
-        const preguntasDeAmbito = encuestaData.preguntas.filter(p => p.ambito.fase === nombre);
-        const puntuacion = preguntasDeAmbito.reduce((acc, p) => acc + (respuestasUsuario[p.id] || 0), 0);
-        const puntuacionMaxima = preguntasDeAmbito.reduce((acc, p) => acc + Math.max(...p.respuestas.map(r => r.peso)), 0);
-        return {
-          nombre: ambitoInfo?.nombre || nombre,
-          area: ambitoInfo?.area || '',
-          puntuacion,
-          puntuacionMaxima
-        };
-      });
-    const puntuacionFinal = ambitosData.reduce((acc, a) => acc + a.puntuacion, 0);
-    const puntuacionMaxima = ambitosData.reduce((acc, a) => acc + a.puntuacionMaxima, 0);
-    return (
-      <EvaluacionFinal
-        ambitos={ambitosData}
-        puntuacionFinal={puntuacionFinal}
-        puntuacionMaxima={puntuacionMaxima}
-        preguntas={encuestaData.preguntas}
-        respuestasUsuario={respuestasUsuario}
-      />
-    );
+    if (vista === 'evaluacionAmbitos') {
+      return <EvaluacionAmbitos ambitos={ambitosData} onVerEvaluacionFinal={handleVerEvaluacionFinal} />;
+    }
+
+    if (vista === 'evaluacionFinal') {
+      const puntuacionFinal = ambitosData.reduce((acc, a) => acc + a.puntuacion, 0);
+      const puntuacionMaxima = ambitosData.reduce((acc, a) => acc + a.puntuacionMaxima, 0);
+      return (
+        <EvaluacionFinal
+          ambitos={ambitosData}
+          puntuacionFinal={puntuacionFinal}
+          puntuacionMaxima={puntuacionMaxima}
+          preguntas={preguntas}
+          respuestasUsuario={respuestasUsuario}
+        />
+      );
+    }
   }
 
   return (
@@ -272,24 +275,24 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange, 
           <AnimatePresence mode="wait">
             {!mostrarMensajeFinal ? (
               <motion.div
-                key={`pregunta-${navegacion.preguntaSlideIndex}`}
+                key={`pregunta-${preguntaSlideIndex}`}
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -30 }}
                 transition={{ duration: 0.3 }}
                 className="encuesta-container"
               >
-            <p className="pregunta-bold">{preguntasAmbito[navegacion.preguntaSlideIndex].pregunta}</p>
+            <p className="pregunta-bold">{preguntasAmbito[preguntaSlideIndex].pregunta}</p>
 
             <div>
-              {preguntasAmbito[navegacion.preguntaSlideIndex].respuestas.map((r, index) => (
-                <label key={`respuesta-${preguntasAmbito[navegacion.preguntaSlideIndex].id}-${r.id}-${index}`}>
+              {preguntasAmbito[preguntaSlideIndex].respuestas.map((r, index) => (
+                <label key={`respuesta-${preguntasAmbito[preguntaSlideIndex].id}-${r.id}-${index}`}>
                   <input
                     type="radio"
-                    name={`respuesta-${preguntasAmbito[navegacion.preguntaSlideIndex].id}`}
+                    name={`respuesta-${preguntasAmbito[preguntaSlideIndex].id}`}
                     value={r.peso}
-                    checked={respuestasUsuario[preguntasAmbito[navegacion.preguntaSlideIndex].id] === r.peso}
-                    onChange={() => manejarRespuesta(preguntasAmbito[navegacion.preguntaSlideIndex].id, r.peso)}
+                    checked={respuestasUsuario[preguntasAmbito[preguntaSlideIndex].id] === r.peso}
+                    onChange={() => manejarRespuesta(preguntasAmbito[preguntaSlideIndex].id, r.peso)}
                   />
                   {" "}{r.texto}
                 </label>
@@ -297,7 +300,7 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange, 
             </div>
 
             <div className="nav-container">
-              <button onClick={preguntaAnterior} disabled={navegacion.preguntaSlideIndex === 0}>
+              <button onClick={preguntaAnterior} disabled={preguntaSlideIndex === 0}>
                 Anterior
               </button>
 
@@ -305,7 +308,7 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange, 
                 {preguntasAmbito.map((pregunta, index) => (
                   <li
                     key={`pagination-${pregunta.id}-${index}`}
-                    className={index === navegacion.preguntaSlideIndex ? "page current" : "page"}
+                    className={index === preguntaSlideIndex ? "page current" : "page"}
                   >
                     {String(index + 1).padStart(2, "0")}
                   </li>
@@ -314,16 +317,16 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange, 
 
               <button
                 onClick={siguientePregunta}
-                disabled={respuestasUsuario[preguntasAmbito[navegacion.preguntaSlideIndex].id] === undefined}
+                disabled={respuestasUsuario[preguntasAmbito[preguntaSlideIndex].id] === undefined}
               >
-                {navegacion.preguntaSlideIndex === preguntasAmbito.length - 1 ?
-                  (navegacion.ambitoActivoIndex === encuestaData.ambitos.length - 1 ? "Finalizar encuesta" : "Finalizar ámbito")
+                {preguntaSlideIndex === preguntasAmbito.length - 1
+                  ? (ambitoActivoIndex === ambitos.length - 1 ? "Finalizar encuesta" : "Finalizar ámbito")
                   : "Siguiente"}
               </button>
             </div>
           </motion.div>
         ) : (
-          navegacion.ambitoActivoIndex < encuestaData.ambitos.length - 1 && (
+          ambitoActivoIndex < ambitos.length - 1 && (
             <motion.div
               key="resultado"
               initial={{ opacity: 0, y: 30 }}
@@ -332,10 +335,10 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange, 
               transition={{ duration: 1 }}
             >
               <ResultadoAmbito
-                ambitoNombre={encuestaData.ambitos[navegacion.ambitoActivoIndex]}
+                ambitoNombre={ambitos[ambitoActivoIndex]}
                 totalPreguntas={preguntasAmbito.length}
                 onSiguienteAmbito={siguienteAmbito}
-                esUltimoAmbito={navegacion.ambitoActivoIndex >= encuestaData.ambitos.length - 1}
+                esUltimoAmbito={ambitoActivoIndex >= ambitos.length - 1}
               />
             </motion.div>
           )

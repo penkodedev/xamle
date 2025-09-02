@@ -9,6 +9,10 @@ import CookieConsent from "@/components/CookieConsent";
 import CookieManager from "@/components/CookieManager";
 
 export const metadata = {
+  icons: {
+    icon: '/favicon.png',
+  },
+  
   title: "XAMLE | Encuesta formación en educación",
   description: "Nivel de formación en educación antirracista y conciencia de su necesidad",
   keywords: ["educación", "antirracismo", "encuesta", "formación", "XAMLE"],

@@ -41,6 +41,11 @@ button.btn-sig-amb {
     margin: 0 auto 60px auto;
 }
 
+p.texto-eval-final {
+    font-size: 1.08em;
+    margin: 40px;
+}
+
 // ******************** MODAL FINAL *********************//
 .modal-final {
     position: fixed;
@@ -166,7 +171,7 @@ p.valoracion-ambito {
     height: 100%;
     background: #FFB41D;
     border-radius: 13px;
-    animation: progressAnim 1.5s linear forwards;
+    //animation: progressAnim 1.5s linear forwards; // estaba dando fallos en la progress de los amibitos
     border: none; // quita el borde del relleno
   }
   
