@@ -1,25 +1,29 @@
 // app/encuesta/page.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import BodyClass from "@/utils/BodyClass";
 
 import Encuesta from "@/components/Encuesta";
 import EncuestaSidebar from "@/components/EncuestaSidebar";
 import SiteInfo from "@/components/SiteInfo";
 
+type AmbitoSidebar = {
+  id: number;
+  nombre: string;
+  slug: string;
+  area: string;
+  aspecto_evaluado: string;
+};
+
 export default function EncuestaPage() {
   const [ambitoActivo, setAmbitoActivo] = useState<string>("");
   const [sidebarData, setSidebarData] = useState<{
-    ambitos: any[];
+    ambitos: AmbitoSidebar[];
     cargando: boolean;
   }>({
     ambitos: [],
     cargando: true
-  });
-  const [siteInfo, setSiteInfo] = useState<{ title: string; description: string }>({
-    title: "",
-    description: "",
   });
   const [mostrarMensajeFinal, setMostrarMensajeFinal] = useState(false);
 

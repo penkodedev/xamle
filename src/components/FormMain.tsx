@@ -73,15 +73,24 @@ export default function FormMain() {
 
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm(prev => ({
-      ...prev,
-      [name]: name === 'edad' ? (value === '' ? '' : value) : value,
-    }));
+
+    setForm(prev => {
+      const newForm = { ...prev, [name]: value };
+
+      // Lógica para limpiar campos de etnia mutuamente excluyentes
+      if (name === 'etniaDetalles' && value) {
+        newForm.etniaOtra = '';
+      }
+      if (name === 'etniaOtra' && value) {
+        newForm.etniaDetalles = '';
+      }
+
+      return newForm;
+    });
   };
 
   const validarFormulario = () => {
@@ -160,12 +169,14 @@ export default function FormMain() {
       const data = await response.json();
 
       if (data.id) {
-        localStorage.setItem('colaboradorId', data.id.toString());
+        // Guardamos tanto el ID como el nombre para usarlo en el PDF
+        const colaboradorInfo = { id: data.id, nombre: form.nombre };
+        localStorage.setItem('colaborador_info', JSON.stringify(colaboradorInfo));
       }
 
       // Redirigir directamente sin mensaje de éxito
       router.push('/encuesta');
-    } catch (error) {
+    } catch {
       setError('Falló el envío. Intenta más tarde.');
       setIsSubmitting(false);
     }

@@ -74,17 +74,6 @@ export const useCookieConsent = () => {
     }
   }, [])
 
-  // Verificar si una categoría específica está habilitada
-  const isCategoryEnabled = useCallback((category: CookieCategory) => {
-    const categoryCookies = getCookiesByCategory(category)
-    return categoryCookies.every(cookie => state.preferences[cookie.id])
-  }, [state.preferences])
-
-  // Verificar si una cookie específica está habilitada
-  const isCookieEnabled = useCallback((cookieId: string) => {
-    return !!state.preferences[cookieId]
-  }, [state.preferences])
-
   // Obtener todas las cookies por categoría
   const getCookiesByCategory = useCallback((category: CookieCategory) => {
     const allCookies = [
@@ -109,6 +98,17 @@ export const useCookieConsent = () => {
     
     return allCookies.filter(cookie => cookie.category === category)
   }, [])
+
+  // Verificar si una categoría específica está habilitada
+  const isCategoryEnabled = useCallback((category: CookieCategory) => {
+    const categoryCookies = getCookiesByCategory(category)
+    return categoryCookies.every(cookie => !!state.preferences[cookie.id])
+  }, [state.preferences, getCookiesByCategory])
+
+  // Verificar si una cookie específica está habilitada
+  const isCookieEnabled = useCallback((cookieId: string) => {
+    return !!state.preferences[cookieId]
+  }, [state.preferences])
 
   // Cargar preferencias al montar el componente
   useEffect(() => {
@@ -158,9 +158,8 @@ export const useGoogleAnalytics = (measurementId: string) => {
       // Inicializar gtag
       window.dataLayer = window.dataLayer || []
       window.gtag = function() {
-        if (window.dataLayer) {
-          window.dataLayer.push(arguments)
-        }
+        // eslint-disable-next-line prefer-rest-params
+        window.dataLayer?.push(arguments)
       }
       window.gtag('js', new Date())
       window.gtag('config', measurementId, {
@@ -248,8 +247,8 @@ export const loadScriptConditionally = (
 // Tipos para TypeScript
 declare global {
   interface Window {
-    gtag?: (...args: any[]) => void
-    dataLayer?: any[]
-    fbq?: (...args: any[]) => void
+    gtag?: (...args: IArguments) => void;
+    dataLayer?: IArguments[];
+    fbq?: (...args: IArguments) => void;
   }
 } 

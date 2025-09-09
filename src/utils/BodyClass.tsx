@@ -1,7 +1,7 @@
 // src/components/utils/BodyClass.tsx
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 
 // Mapa ruta -> array de clases a aplicar al body
@@ -12,7 +12,9 @@ const routeBodyClassMap: Record<string, string[]> = {
 
 const BodyClass = () => {
   const pathname = usePathname();
-  const bodyClasses = routeBodyClassMap[pathname] || [];
+  const bodyClasses = useMemo(
+    () => routeBodyClassMap[pathname] || [],
+    [pathname]);
 
   useEffect(() => {
     const body = document.body;
@@ -24,7 +26,7 @@ const BodyClass = () => {
     return () => {
       bodyClasses.forEach((cls) => body.classList.remove(cls));
     };
-  }, [pathname]);
+  }, [bodyClasses]);
 
   return null;
 };

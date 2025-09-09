@@ -1,0 +1,122 @@
+
+//----------------------------------------------------
+//            SMALLER THAN 1440px
+//----------------------------------------------------
+@media screen and (max-width: 1440px) {
+   
+
+}
+
+
+//----------------------------------------------------
+//            SMALLER THAN 1200px
+//----------------------------------------------------
+@media screen and (max-width: 1200px) {
+
+
+}
+
+//----------------------------------------------------
+//            SMALLER THAN 992px
+//----------------------------------------------------
+@media screen and (max-width: 992px) {
+
+    .ambito-area h2 {
+        font-size: 2em;
+    }
+
+    .encuesta-container {
+        padding: 20px 30px 40px;
+    }
+   
+}
+
+//----------------------------------------------------
+//            SMALLER THAN 768px
+//----------------------------------------------------
+@media screen and (max-width: 768px) {
+
+    main {
+        padding-inline: 1em;
+    }
+
+    .layout-encuesta {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .encuesta-sidebar {
+        display: flex;
+        flex-direction: column;
+        width: 90%;
+        margin: 0 0 35px 30px;
+    }
+
+    .page-encuesta .copy-encuesta {
+        max-width: 400px;
+    }
+
+    .resultado-container {
+        width: auto;
+        padding: 20px;
+
+        h2 {
+            text-align: center;
+        }
+    }
+
+    .texto-eval-final {
+        padding: 10px;
+        margin: 0;
+    }
+
+}
+
+
+//----------------------------------------------------
+//            SMALLER THAN 576px
+//----------------------------------------------------
+@media screen and (max-width: 576px) {
+
+    .header-desc { 
+        font-size: 0.8em;
+    }
+
+     #logo-container img.logo-xamle-header {
+        width: 90px;   /* reduce al 50% del contenedor */
+        height: auto; /* mantiene la proporción */
+     }
+
+     .form-text {
+        font-size: 1em;
+        padding: 22px 18px;
+     }
+
+     .form-main {
+        padding: 0 20px 20px;
+
+        fieldset {
+            width: 85%;
+        }
+
+        legend {
+            font-size: 1em;
+        }
+
+        h1 {
+            font-size: 1.4em;
+        }
+     }
+
+}
+
+//----------------------------------------------------
+//            SMALLER THAN 400px
+//----------------------------------------------------
+@media screen and (max-width: 400px) {
+
+.header-desc { 
+        font-size: 0.73em;
+        line-height: 1em;
+    }
+}

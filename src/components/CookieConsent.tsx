@@ -266,7 +266,6 @@ const CookieConsent = () => {
             {Object.entries(grouped).map(([category, cookies]) => {
               const categoryInfo = getCategoryInfo(category)
               const categoryEnabled = cookies.every(cookie => localOptions[cookie.id])
-              const categoryDisabled = cookies.every(cookie => !localOptions[cookie.id])
               
               return (
                 <div key={category} className="cookie-category">
@@ -336,7 +335,7 @@ const CookieConsent = () => {
             Guardar y acceptar
           </button>
           <p className="cookie-consent-legal">
-            Al hacer clic en "Guardar y acceptar", aceptas el uso de cookies según tus selecciones. 
+            Al hacer clic en &quot;Guardar y acceptar&quot;, aceptas el uso de cookies según tus selecciones. 
             <br></br>Puedes cambiar estas preferencias en cualquier momento.
           </p>
         </div>
