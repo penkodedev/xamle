@@ -164,6 +164,7 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
           area: ambito.area,
           aspecto_evaluado: ambito.aspecto_evaluado,
           puntuacion: ambito.puntuacion,
+          valoraciones: ambito.valoraciones, // <-- ¡LA LÍNEA QUE FALTA!
           puntuacionMaxima: ambito.puntuacionMaxima,
           valoracion: {
             titulo: valoracionAmbito?.titulo || 'N/A',
