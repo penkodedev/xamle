@@ -33,8 +33,8 @@ export function generarPDF(datosParaPDF: DatosPDF) {
         cursorY = margin;
     }
     doc.setFontSize(options.fontSize || 10);
-    doc.setFont(undefined, options.fontStyle || 'normal');
-    doc.setTextColor(options.textColor || '#000000'); // Negro por defecto
+    doc.setFont(doc.getFont().fontName, options.fontStyle || 'normal');
+    doc.setTextColor(String(options.textColor || '#000000')); // Negro por defecto
     doc.text(splitText, margin, cursorY);
     cursorY += textDimensions.h + yOffset;
   };
