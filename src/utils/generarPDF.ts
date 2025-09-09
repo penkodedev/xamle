@@ -26,7 +26,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
   // Helper para añadir texto con control de saltos de página
   const addText = (text: string, options: { fontSize?: number; fontStyle?: string; textColor?: string | number }, yOffset = 5) => {
     const splitText = doc.splitTextToSize(text, pageWidth - margin * 2);
-    const textDimensions = doc.getTextDimensions(splitText, { fontSize: options.fontSize || 10, fontStyle: options.fontStyle || 'normal' });
+    const textDimensions = doc.getTextDimensions(splitText, { fontSize: options.fontSize || 10, font: options.fontStyle || 'normal' });
 
     if (cursorY + textDimensions.h > doc.internal.pageSize.getHeight() - margin) {
         doc.addPage();
