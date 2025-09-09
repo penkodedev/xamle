@@ -161,7 +161,10 @@ export const useGoogleAnalytics = (measurementId: string) => {
         // eslint-disable-next-line prefer-rest-params
         window.dataLayer?.push(arguments)
       }
-      window.gtag('js', new Date())
+      // CORRECCIÓN: TypeScript es estricto con los tipos de gtag.
+      // Le decimos que trate los argumentos como 'any' para que coincidan con la definición global.
+      const gtagArgs: any[] = ['js', new Date()];
+      window.gtag(...gtagArgs);
       window.gtag('config', measurementId, {
         anonymize_ip: true,
         cookie_flags: 'SameSite=None;Secure'
@@ -247,7 +250,7 @@ export const loadScriptConditionally = (
 // Tipos para TypeScript
 declare global {
   interface Window {
-    gtag?: (...args: IArguments) => void;
+    gtag?: (...args: any[]) => void;
     dataLayer?: IArguments[];
     fbq?: (...args: IArguments) => void;
   }
