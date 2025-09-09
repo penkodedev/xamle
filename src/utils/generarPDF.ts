@@ -4,10 +4,6 @@ import jsPDF from "jspdf";
 import logoBase64 from "@/assets/madafrica-logo-base64";
 import { DatosPDF } from "@/types";
 
-// --- TIPOS DE DATOS PARA EL PDF ---
-// NOTA: Las interfaces se han ajustado para coincidir con los datos reales de la aplicación.
-// La interfaz `AmbitoData` y otras relevantes se importan ahora desde `@/types`.
-
 /**
  * Genera un informe en PDF a partir de los datos de la evaluación.
  * @param datosParaPDF - Un objeto que contiene todos los datos necesarios para el informe.
