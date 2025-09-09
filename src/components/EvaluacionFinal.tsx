@@ -5,6 +5,7 @@ type Respuesta = {
   id: number;
   texto: string;
   peso: number;
+  valoracion_detallada?: string; // Añadimos la propiedad que falta como opcional
 };
 
 type Pregunta = {
