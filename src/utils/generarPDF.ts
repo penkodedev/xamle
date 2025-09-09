@@ -46,11 +46,13 @@ export function generarPDF(datosParaPDF: DatosPDF) {
   // --- 1. Portada ---
   doc.addImage(logoBase64, "PNG", margin, 20, logoWidth, logoHeight);
   doc.setFontSize(22);
-  doc.setFont(undefined, 'bold');
+  // CORRECCIÓN 1: No se puede usar 'undefined'. Usamos la fuente actual del documento.
+  doc.setFont(doc.getFont().fontName, 'bold');
   doc.text("Informe de Autoevaluación Antirracista", pageWidth / 2, 90, { align: 'center' });
   
   doc.setFontSize(14);
-  doc.setFont(undefined, 'normal');
+  // CORRECCIÓN 2: Mismo problema aquí.
+  doc.setFont(doc.getFont().fontName, 'normal');
   doc.text(`Colaborador/a: ${nombreColaborador || "No disponible"}`, pageWidth / 2, 110, { align: 'center' });
   
   doc.setFontSize(10);
