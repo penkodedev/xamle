@@ -252,6 +252,6 @@ declare global {
   interface Window {
     gtag?: (...args: any[]) => void;
     dataLayer?: IArguments[];
-    fbq?: (...args: IArguments) => void;
+    fbq?: (...args: any[]) => void;
   }
 } 
