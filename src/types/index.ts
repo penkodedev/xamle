@@ -21,6 +21,22 @@ export type ValoracionAmbito = {
   recomendacion: string;
 };
 
+export type ValoracionAmbitoPDF = {
+  titulo: string;
+  texto: string;
+};
+
+export type AmbitoPDF = {
+  nombre: string;
+  area: string;
+  aspecto_evaluado: string;
+  puntuacion: number;
+  puntuacionMaxima: number;
+  valoracion: ValoracionAmbitoPDF;
+  recomendacion: string;
+  graficoBarraBase64: string;
+};
+
 export type AmbitoData = {
   nombre: string;
   area: string;
@@ -30,12 +46,17 @@ export type AmbitoData = {
   aspecto_evaluado: string;
 };
 
+export type RespuestaDetalladaPDF = {
+  pregunta: string;
+  respuesta: string;
+  comentario: string;
+};
+
 export type DatosPDF = {
   nombreColaborador: string;
   puntuacionTotal: number;
   valoracionFinal: { titulo: string; texto: string; recomendacion: string };
   graficoRadarBase64: string; // Propiedad que faltaba
-  ambitos: AmbitoData[];
-  // Propiedad que faltaba para las respuestas detalladas
-  respuestasDetalladas: { pregunta: string; respuesta: string; comentario: string }[];
+  ambitos: AmbitoPDF[];
+  respuestasDetalladas: RespuestaDetalladaPDF[];
 };

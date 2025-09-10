@@ -2,7 +2,7 @@
 
 import jsPDF from "jspdf";
 import logoBase64 from "@/assets/madafrica-logo-base64";
-import { DatosPDF } from "@/types"; // Asegúrate de que la ruta a tu archivo de tipos sea correcta
+import { DatosPDF } from "@/types/index"; // Asegúrate de que la ruta a tu archivo de tipos sea correcta
 
 /**
  * Genera un informe en PDF a partir de los datos de la evaluación.
@@ -11,6 +11,7 @@ import { DatosPDF } from "@/types"; // Asegúrate de que la ruta a tu archivo de
 export function generarPDF(datosParaPDF: DatosPDF) {
   const {
     nombreColaborador,
+    puntuacionTotal,
     ambitos,
   } = datosParaPDF;
 
@@ -74,11 +75,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
       
       // Aspecto Evaluado
       addText('Aspecto Evaluado:', { fontSize: 11, fontStyle: 'bold' }, 5);
-      addText(ambito.aspecto_evaluado || 'No disponible', { fontSize: 10 }, 10);
-      
-      // Valoración de Compromiso
-      addText('Nivel de Compromiso:', { fontSize: 11, fontStyle: 'bold' }, 5);
-      addText(ambito.valoracion.titulo || 'No disponible', { fontSize: 10, fontStyle: 'italic' }, 10);
+      addText(ambito.valoracion.texto, { fontSize: 10 }, 10);
       
       // Recomendación para PDF
       if (ambito.recomendacion && typeof ambito.recomendacion === 'string') {
