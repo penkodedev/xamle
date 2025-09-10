@@ -36,6 +36,15 @@
 //----------------------------------------------------
 @media screen and (max-width: 768px) {
 
+    body {
+        line-height: auto;
+    }
+
+    header {
+        display: flex;
+        flex-direction: row-reverse;
+    }
+    
     main {
         padding-inline: 1em;
     }
@@ -54,6 +63,16 @@
 
     .page-encuesta .copy-encuesta {
         max-width: 400px;
+    }
+
+    .encuesta-container {
+        p.pregunta-bold {
+            font-size: 0.7em !important;
+        }
+        label {
+            font-size: 1em;
+            line-height: 1.1em;
+        }
     }
 
     .resultado-container {

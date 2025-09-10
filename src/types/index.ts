@@ -40,5 +40,8 @@ export type DatosPDF = {
   nombreColaborador: string;
   puntuacionTotal: number;
   valoracionFinal: { titulo: string; texto: string; recomendacion: string };
+  graficoRadarBase64: string; // Propiedad que faltaba
   ambitos: AmbitoData[];
+  // Propiedad que faltaba para las respuestas detalladas
+  respuestasDetalladas: { pregunta: string; respuesta: string; comentario: string }[];
 };

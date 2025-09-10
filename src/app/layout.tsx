@@ -18,18 +18,19 @@ export const metadata = {
   keywords: ["educación", "antirracismo", "encuesta", "formación", "XAMLE"],
   author: "Paulo Ramalho | penkode.com",
   robots: "index, follow",
-  metadataBase: new URL("https://xamle.com"), // <-- aquí
+  metadataBase: new URL("https://xamle.madafrica.es"),
   openGraph: {
     title: "XAMLE | Encuesta formación en educación",
     description: "Participa en nuestra encuesta sobre formación en educación antirracista.",
-    url: "https://xamle.com",
+    url: "https://xamle.madafrica.es",
     type: "website",
     images: [
       {
-        url: "/logo-xamle-mad-footer.png",
+        // Usar el favicon como imagen para redes sociales
+        url: "/favicon.png", 
         width: 1200,
         height: 630,
-        alt: "Logo XAMLE"
+        alt: "Logo de XAMLE y MAD África"
       }
     ]
   },
@@ -37,9 +38,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "XAMLE | Encuesta formación en educación",
     description: "Participa en nuestra encuesta sobre formación en educación antirracista.",
-    images: [
-      "/logo-xamle-mad-footer.png"
-    ]
+    images: ["/favicon.png"] // La misma imagen para Twitter
   }
 };
 
