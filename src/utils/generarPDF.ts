@@ -30,8 +30,11 @@ export function generarPDF(datosParaPDF: DatosPDF) {
 
   // Helper para añadir texto con control de saltos de página
   const addText = (text: string, options: { fontSize?: number; fontStyle?: string; textColor?: string | number }, yOffset = 5) => {
-    const splitText = doc.splitTextToSize(text || '', pageWidth - margin * 2); // Asegurarse de que text no sea null/undefined
-    const textDimensions = doc.getTextDimensions(splitText, { fontSize: options.fontSize || 10, fontStyle: options.fontStyle || 'normal' });
+    // **SOLUCIÓN**: Establecer la fuente y el estilo ANTES de medir el texto.
+    doc.setFont('helvetica', options.fontStyle || 'normal');
+    doc.setFontSize(options.fontSize || 10);
+    const splitText = doc.splitTextToSize(text || '', pageWidth - margin * 2);
+    const textDimensions = doc.getTextDimensions(splitText);
 
     if (cursorY + textDimensions.h > doc.internal.pageSize.getHeight() - margin) {
         doc.addPage();
@@ -39,7 +42,6 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     }
     doc.setFontSize(options.fontSize || 10);
     doc.setFont('helvetica', options.fontStyle || 'normal');
-    doc.setTextColor(String(options.textColor || '#000000')); // Negro por defecto
     doc.text(splitText, margin, cursorY);
     cursorY += textDimensions.h + yOffset;
   };
