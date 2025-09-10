@@ -20,7 +20,8 @@
 //            SMALLER THAN 992px
 //----------------------------------------------------
 @media screen and (max-width: 992px) {
-
+    
+    // ************** ENCUESTA *************//
     .ambito-area h2 {
         font-size: 2em;
     }
@@ -28,6 +29,9 @@
     .encuesta-container {
         padding: 20px 30px 40px;
     }
+
+    // ************** RESULTADOS *************//
+    // (No hay estilos específicos para esta resolución)
    
 }
 
@@ -36,45 +40,44 @@
 //----------------------------------------------------
 @media screen and (max-width: 768px) {
 
+    // ************** GENERAL & LAYOUT *************//
     body {
         line-height: auto;
-    }
-
-    header {
-        display: flex;
-        flex-direction: row-reverse;
     }
     
     main {
         padding-inline: 1em;
     }
 
+    // ************** HEADER *************//
+    header {
+        display: flex;
+        flex-direction: row-reverse;
+    }
+
+    // ************** ENCUESTA *************//
     .layout-encuesta {
         display: flex;
         flex-direction: column;
     }
-
     .encuesta-sidebar {
         display: flex;
         flex-direction: column;
         width: 90%;
         margin: 0 0 35px 30px;
     }
-
-    .page-encuesta .copy-encuesta {
-        max-width: 400px;
-    }
-
     .encuesta-container {
         p.pregunta-bold {
-            font-size: 0.7em !important;
+            font-size: 1.1em !important;
         }
+
         label {
             font-size: 1em;
             line-height: 1.1em;
         }
     }
 
+    // ************** RESULTADOS (ÁMBITO Y FINAL) *************//
     .resultado-container {
         width: auto;
         padding: 20px;
@@ -83,12 +86,15 @@
             text-align: center;
         }
     }
-
     .texto-eval-final {
         padding: 10px;
         margin: 0;
     }
 
+    // ************** FOOTER *************//
+    .page-encuesta .copy-encuesta {
+        max-width: 400px;
+    }
 }
 
 
@@ -97,17 +103,22 @@
 //----------------------------------------------------
 @media screen and (max-width: 576px) {
 
+    // ************** HEADER *************//
     .header-desc { 
         font-size: 0.8em;
     }
 
      #logo-container img.logo-xamle-header {
+        // TODO: Revisar si este selector sigue siendo necesario o se puede generalizar
         width: 90px;   /* reduce al 50% del contenedor */
         height: auto; /* mantiene la proporción */
      }
 
+
+     // ************** FORMULARIO *************//
+
      .form-text {
-        font-size: 1em;
+        font-size: 1.1em;
         padding: 22px 18px;
      }
 
@@ -115,6 +126,8 @@
         padding: 0 20px 20px;
 
         fieldset {
+            display: flex;
+            flex-direction: column;
             width: 85%;
         }
 
@@ -127,15 +140,37 @@
         }
      }
 
+     // ************** FOOTER *************//
+
+     .footer small {
+        width: 90%;
+        margin:  0 auto;
+        line-height: 1.2em;
+     }
 }
 
 //----------------------------------------------------
 //            SMALLER THAN 400px
 //----------------------------------------------------
 @media screen and (max-width: 400px) {
-
-.header-desc { 
+    
+    // ************** HEADER *************//
+    .header-desc { 
         font-size: 0.73em;
         line-height: 1em;
+    }
+
+    // ************** ENCUESTA *************//
+
+    .resultado-container {
+        margin: -20px 0 100px 0
+    }
+
+    .score-animado {
+        text-align: center;
+    }
+
+    .nav-buttons {
+        gap: 6px;
     }
 }

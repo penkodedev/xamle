@@ -62,7 +62,9 @@ export default function EvaluacionAmbitos({ ambitos, onVerEvaluacionFinal }: Eva
           return (
             <li key={ambito.nombre}>
               <h2>{ambito.nombre} - {ambito.area}</h2>
-              <p className="score-animado"> Tu puntuación ha sido <span className="current-score">{ambito.puntuacion}</span> de {ambito.puntuacionMaxima} puntos.</p>
+              <p className="score-animado">
+                Tu puntuación ha sido <span className="current-score">{ambito.puntuacion}</span> de {ambito.puntuacionMaxima} puntos.
+              </p>
               
               
               <div className="resultado-desc fade-in">
