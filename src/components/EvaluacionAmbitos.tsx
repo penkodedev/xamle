@@ -78,10 +78,8 @@ export default function EvaluacionAmbitos({ ambitos, onVerEvaluacionFinal }: Eva
                 </div>
 
                 <div className="accordion-ambito">
-                  <button onClick={() => toggleAccordion(idx)} className="accordion-toggle" aria-expanded={openAccordion === idx}>
-                    Ver explicación
-                    {/* El icono puede ser un SVG o un carácter para indicar el estado */}
-                    <span className={`accordion-icon ${openAccordion === idx ? 'open' : ''}`}>▼</span>
+                  <button onClick={() => toggleAccordion(idx)} className={`accordion-toggle ${openAccordion === idx ? 'active' : ''}`} aria-expanded={openAccordion === idx}>
+                    {openAccordion === idx ? 'Ver menos' : 'Ver explicación'}
                   </button>
                 <AnimatePresence initial={false}>
                   {openAccordion === idx && (
