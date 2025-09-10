@@ -28,12 +28,6 @@ export type AmbitoData = {
   puntuacionMaxima: number;
   valoraciones: ValoracionAmbito[];
   aspecto_evaluado: string;
-  valoracion: {
-    titulo: string;
-    texto: string;
-  };
-  recomendacion: string;
-  graficoBarraBase64: string;
 };
 
 export type DatosPDF = {

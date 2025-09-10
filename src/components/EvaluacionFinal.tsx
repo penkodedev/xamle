@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { generarPDF } from "@/utils/generarPDF";
-import { DatosPDF } from "@/types";
+import { DatosPDF, AmbitoPDF } from "@/utils/types"; // Importamos AmbitoPDF
 
 type Respuesta = {
   id: number;
@@ -160,7 +160,7 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
         recomendacion: valoracionFinal?.recomendacion || 'Sin recomendación',
       },
       graficoRadarBase64: '', // Dejamos esto vacío por ahora
-      ambitos: ambitos.map(ambito => {
+      ambitos: ambitos.map((ambito): AmbitoPDF => { // Especificamos el tipo de retorno
         // Ordenamos las valoraciones de mayor a menor puntuación mínima
         const sortedValoraciones = [...(ambito.valoraciones || [])].sort((a, b) => b.puntuacion_min - a.puntuacion_min);
         
