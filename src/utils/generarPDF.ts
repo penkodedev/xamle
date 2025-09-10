@@ -2,7 +2,7 @@
 
 import jsPDF from "jspdf";
 import logoBase64 from "@/assets/madafrica-logo-base64";
-import { DatosPDF } from "@/types";
+import { DatosPDF } from "@/types"; // Asegúrate de que la ruta a tu archivo de tipos sea correcta
 
 /**
  * Genera un informe en PDF a partir de los datos de la evaluación.
@@ -19,21 +19,25 @@ export function generarPDF(datosParaPDF: DatosPDF) {
   const pageWidth = doc.internal.pageSize.getWidth();
   let cursorY = 10;
 
+  // **SOLUCIÓN**: Establecer una fuente por defecto inmediatamente después de crear el doc.
+  // Esto asegura que todas las llamadas a `getTextDimensions` tengan una fuente válida.
+  doc.setFont('helvetica', 'normal');
+
   // Tamaño del logo (ajustado)
   const logoWidth = 40;
   const logoHeight = 15;
 
   // Helper para añadir texto con control de saltos de página
   const addText = (text: string, options: { fontSize?: number; fontStyle?: string; textColor?: string | number }, yOffset = 5) => {
-    const splitText = doc.splitTextToSize(text, pageWidth - margin * 2);
-    const textDimensions = doc.getTextDimensions(splitText, { fontSize: options.fontSize || 10, font: options.fontStyle || 'normal' });
+    const splitText = doc.splitTextToSize(text || '', pageWidth - margin * 2); // Asegurarse de que text no sea null/undefined
+    const textDimensions = doc.getTextDimensions(splitText, { fontSize: options.fontSize || 10, fontStyle: options.fontStyle || 'normal' });
 
     if (cursorY + textDimensions.h > doc.internal.pageSize.getHeight() - margin) {
         doc.addPage();
         cursorY = margin;
     }
     doc.setFontSize(options.fontSize || 10);
-    doc.setFont(doc.getFont().fontName, options.fontStyle || 'normal');
+    doc.setFont('helvetica', options.fontStyle || 'normal');
     doc.setTextColor(String(options.textColor || '#000000')); // Negro por defecto
     doc.text(splitText, margin, cursorY);
     cursorY += textDimensions.h + yOffset;
@@ -46,13 +50,10 @@ export function generarPDF(datosParaPDF: DatosPDF) {
   // --- 1. Portada ---
   doc.addImage(logoBase64, "PNG", margin, 20, logoWidth, logoHeight);
   doc.setFontSize(22);
-  // CORRECCIÓN 1: No se puede usar 'undefined'. Usamos la fuente actual del documento.
-  doc.setFont(doc.getFont().fontName, 'bold');
   doc.text("Informe de Autoevaluación Antirracista", pageWidth / 2, 90, { align: 'center' });
   
   doc.setFontSize(14);
-  // CORRECCIÓN 2: Mismo problema aquí.
-  doc.setFont(doc.getFont().fontName, 'normal');
+  doc.setFont('helvetica', 'normal');
   doc.text(`Colaborador/a: ${nombreColaborador || "No disponible"}`, pageWidth / 2, 110, { align: 'center' });
   
   doc.setFontSize(10);
@@ -73,14 +74,14 @@ export function generarPDF(datosParaPDF: DatosPDF) {
       
       // Aspecto Evaluado
       addText('Aspecto Evaluado:', { fontSize: 11, fontStyle: 'bold' }, 5);
-      addText(ambito.valoracion.texto, { fontSize: 10 }, 10);
+      addText(ambito.aspecto_evaluado || 'No disponible', { fontSize: 10 }, 10);
       
       // Valoración de Compromiso
       addText('Nivel de Compromiso:', { fontSize: 11, fontStyle: 'bold' }, 5);
       addText(ambito.valoracion.titulo || 'No disponible', { fontSize: 10, fontStyle: 'italic' }, 10);
       
       // Recomendación para PDF
-      if (ambito.recomendacion) {
+      if (ambito.recomendacion && typeof ambito.recomendacion === 'string') {
           addText('Recomendaciones:', { fontSize: 11, fontStyle: 'bold' }, 5);
           const textoPlano = ambito.recomendacion
               .replace(/<br\s*\/?>/gi, '\n')

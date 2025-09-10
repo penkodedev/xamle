@@ -141,7 +141,7 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange, 
   // Lo movemos aquí para que se llame incondicionalmente en cada render
   const ambitosData = useMemo(() => {
     return ambitos.map((nombre) => {
-        const ambitoInfo = ambitosAPI.find((a) => a.nombre === nombre || a.slug === nombre);
+        const ambitoInfo = ambitosAPI.find((a) => a.nombre === nombre || a.slug === nombre) || {} as AmbitoAPI;
         const preguntasDeAmbito = preguntas.filter((p) => p.ambito.fase === nombre);
         const puntuacion = preguntasDeAmbito.reduce((acc, p) => acc + (respuestasUsuario[p.id] || 0), 0); // Suma de puntos obtenidos
         const puntuacionMaxima = preguntasDeAmbito.reduce((acc, p) => acc + Math.max(...p.respuestas.map((r) => r.peso)), 0); // Suma de puntos máximos posibles
@@ -151,7 +151,7 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange, 
             nombre: ambitoInfo?.nombre || nombre,
             area: ambitoInfo?.area || '',
             aspecto_evaluado: ambitoInfo?.aspecto_evaluado || '', // <-- CORRECCIÓN AQUÍ
-            valoraciones: ambitoInfo?.valoraciones || [], // <-- LA LÍNEA CLAVE: Añadimos las valoraciones aquí
+            valoraciones: ambitoInfo?.valoraciones || [], // Aseguramos que siempre sea un array
             puntuacion,
             puntuacionMaxima,
         };
@@ -205,7 +205,14 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange, 
   }, []);
 
   const enviarRespuestasFinales = useCallback(async () => {
-    const colaboradorId = localStorage.getItem('colaboradorId');
+    let colaboradorId: string | null = null;
+    try {
+      const infoGuardada = localStorage.getItem('colaborador_info');
+      if (infoGuardada) {
+        colaboradorId = JSON.parse(infoGuardada).id;
+      }
+    } catch (e) { /* No hacer nada si falla el parseo */ }
+
     if (!colaboradorId) {
       console.error("No se encontró el ID del colaborador para enviar las respuestas.");
       return;

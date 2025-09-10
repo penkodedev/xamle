@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { generarPDF } from "@/utils/generarPDF";
+import { DatosPDF } from "@/types";
 
 type Respuesta = {
   id: number;
@@ -60,13 +61,13 @@ function getValoracionPorPuntuacion(puntos: number, valoraciones: Valoracion[]):
   const valoracionEncontrada = sortedValoraciones.find(v => puntos >= v.puntuacion_minima);
 
   // Si se encuentra una valoración, se devuelve.
-  // Si no (porque la puntuación es más baja que todos los mínimos),
-  // se devuelve la valoración con la puntuación mínima más baja (la última del array ordenado).
-  // Esto asegura que siempre haya un resultado, incluso para puntuaciones muy bajas.
+  // Si no, se devuelve la de menor puntuación. Si el array está vacío, devuelve null.
+  // Esto asegura que siempre haya un resultado si hay valoraciones.
   return valoracionEncontrada || sortedValoraciones[sortedValoraciones.length - 1] || null;
 }
 
 export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMaxima, preguntas, respuestasUsuario, valoraciones }: EvaluacionFinalProps) {
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   // Animación para puntuación final
   const [animatedScores, setAnimatedScores] = useState(ambitos.map(() => 0));
   const [animatedPercents, setAnimatedPercents] = useState(ambitos.map(() => 0));
@@ -133,7 +134,10 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
   }, [ambitos, puntuacionFinal]);
 
   function handleDescargarPDF() {
+    setIsGeneratingPdf(true);
+
     let nombreColaborador = "Colaborador";
+    // **SOLUCIÓN**: Mover la lógica de localStorage aquí para asegurar que se ejecuta en el cliente.
     try {
       const infoGuardada = localStorage.getItem('colaborador_info');
       if (infoGuardada) {
@@ -147,30 +151,36 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
     }
 
     // Llamar a generarPDF con los datos correctos
-    const datosParaPDF = {
-      nombreColaborador: nombreColaborador,
+    const datosParaPDF: DatosPDF = {
+      nombreColaborador,
       puntuacionTotal: puntuacionFinal,
       valoracionFinal: {
         titulo: valoracionFinal?.titulo || 'N/A',
         texto: valoracionFinal?.texto_valoracion || 'Sin texto',
-        recomendacion: valoracionFinal?.recomendacion || 'Sin recomendación', // Ahora esto es correcto
+        recomendacion: valoracionFinal?.recomendacion || 'Sin recomendación',
       },
       graficoRadarBase64: '', // Dejamos esto vacío por ahora
       ambitos: ambitos.map(ambito => {
-        const sortedValoraciones = [...ambito.valoraciones].sort((a, b) => b.puntuacion_min - a.puntuacion_min);
-        const valoracionAmbito = sortedValoraciones.find(v => ambito.puntuacion >= v.puntuacion_min);
+        // Ordenamos las valoraciones de mayor a menor puntuación mínima
+        const sortedValoraciones = [...(ambito.valoraciones || [])].sort((a, b) => b.puntuacion_min - a.puntuacion_min);
+        
+        // Encontramos la valoración correcta o la de menor puntuación como fallback.
+        const valoracionEncontrada = sortedValoraciones.find(v => ambito.puntuacion >= v.puntuacion_min);
+        const valoracionAmbito = valoracionEncontrada 
+          || sortedValoraciones[sortedValoraciones.length - 1] 
+          || { titulo: 'N/A', texto: 'Sin texto de valoración disponible.', recomendacion: 'Sin recomendación' };
+        
         return {
           nombre: ambito.nombre,
           area: ambito.area,
           aspecto_evaluado: ambito.aspecto_evaluado,
           puntuacion: ambito.puntuacion,
-          valoraciones: ambito.valoraciones, // <-- ¡LA LÍNEA QUE FALTA!
           puntuacionMaxima: ambito.puntuacionMaxima,
           valoracion: {
-            titulo: valoracionAmbito?.titulo || 'N/A',
-            texto: valoracionAmbito?.texto || 'Sin texto',
+            titulo: valoracionAmbito.titulo,
+            texto: valoracionAmbito.texto,
           },
-          recomendacion: valoracionAmbito?.recomendacion || 'Sin recomendación', // Esto ya era correcto
+          recomendacion: valoracionAmbito.recomendacion,
           graficoBarraBase64: '', // Dejamos esto vacío por ahora
         };
       }),
@@ -184,8 +194,13 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
         };
       }),
     };
-    generarPDF(datosParaPDF);
-    setMostrarModal(true);
+
+    // Retrasar ligeramente la generación para permitir que el estado se actualice
+    setTimeout(() => {
+      generarPDF(datosParaPDF);
+      setMostrarModal(true);
+      setIsGeneratingPdf(false);
+    }, 50);
   }
 
   function handleCerrarModal() {
@@ -229,7 +244,11 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
           <p>Cargando recomendación...</p>
         )}
       </div>
-      <button className="btn-sig-amb" onClick={handleDescargarPDF}>Descarga en PDF tu evaluación detallada y recomendaciones</button>
+      <button className="btn-sig-amb" onClick={handleDescargarPDF} disabled={isGeneratingPdf}>
+        {isGeneratingPdf 
+          ? 'Generando PDF...' 
+          : 'Descarga en PDF tu evaluación detallada y recomendaciones'}
+      </button>
       <small className="msj-final-boton">Al descargar el PDF recibirás una evaluación detallada y recomendaciones para mejorar tu practica docente antiracista.</small>      {mostrarModal && (
         <div className="modal-final">
           <div>
