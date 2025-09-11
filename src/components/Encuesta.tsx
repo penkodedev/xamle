@@ -312,7 +312,7 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange, 
   }
 
   return (
-    <div className="encuesta-block">
+    <div className="encuesta-block" key={`ambito-${ambitoActivoIndex}`}>
           <AnimatePresence mode="wait">
             {preguntasAmbito.length > 0 && !mostrarMensajeFinal ? (
               <motion.div
