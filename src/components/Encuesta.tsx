@@ -141,17 +141,17 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange, 
   // Lo movemos aquí para que se llame incondicionalmente en cada render
   const ambitosData = useMemo(() => {
     return ambitos.map((nombre) => {
-        const ambitoInfo = ambitosAPI.find((a) => a.nombre === nombre || a.slug === nombre) || {} as AmbitoAPI;
+        const ambitoInfo = ambitosAPI.find((a) => a.nombre === nombre || a.slug === nombre);
         const preguntasDeAmbito = preguntas.filter((p) => p.ambito.fase === nombre);
         const puntuacion = preguntasDeAmbito.reduce((acc, p) => acc + (respuestasUsuario[p.id] || 0), 0); // Suma de puntos obtenidos
         const puntuacionMaxima = preguntasDeAmbito.reduce((acc, p) => acc + Math.max(...p.respuestas.map((r) => r.peso)), 0); // Suma de puntos máximos posibles
         
         return {
             ...ambitoInfo,
-            nombre: ambitoInfo?.nombre || nombre,
-            area: ambitoInfo?.area || '',
-            aspecto_evaluado: ambitoInfo?.aspecto_evaluado || '', // <-- CORRECCIÓN AQUÍ
-            valoraciones: ambitoInfo?.valoraciones || [], // Aseguramos que siempre sea un array
+            nombre: ambitoInfo?.nombre ?? nombre,
+            area: ambitoInfo?.area ?? '',
+            aspecto_evaluado: ambitoInfo?.aspecto_evaluado ?? '',
+            valoraciones: ambitoInfo?.valoraciones ?? [],
             puntuacion,
             puntuacionMaxima,
         };
