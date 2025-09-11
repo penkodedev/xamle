@@ -68,11 +68,11 @@
         margin: 0 0 35px 0;
     }
     .encuesta-container {
-        p.pregunta-bold {
+        & p.pregunta-bold {
             font-size: 1.1em !important;
         }
 
-        label {
+        & label {
             font-size: 1em;
             line-height: 1.1em;
         }
@@ -93,10 +93,14 @@
     }
 
     // ************** FOOTER *************//
-    .page-encuesta .copy-encuesta {
-        max-width: 400px;
+    .copy-encuesta {
+        display: flex;
+        flex-direction: column;
+        max-width: 300px;
+        margin: 0 auto;
     }
 }
+
 
 
 //----------------------------------------------------
@@ -164,7 +168,7 @@
     // ************** ENCUESTA *************//
 
     .resultado-container {
-        margin: -20px 0 100px 0
+        margin: -20px 0 100px 0;
     }
 
     .score-animado {
