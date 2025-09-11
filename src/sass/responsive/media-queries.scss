@@ -42,7 +42,7 @@
 
     // ************** GENERAL & LAYOUT *************//
     body {
-        line-height: auto;
+        //line-height: auto;
     }
     
     main {
@@ -59,12 +59,13 @@
     .layout-encuesta {
         display: flex;
         flex-direction: column;
+        align-items: center;
     }
     .encuesta-sidebar {
         display: flex;
         flex-direction: column;
         width: 90%;
-        margin: 0 0 35px 30px;
+        margin: 0 0 35px 0;
     }
     .encuesta-container {
         p.pregunta-bold {
