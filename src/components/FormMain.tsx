@@ -194,7 +194,7 @@ export default function FormMain() {
       </fieldset>
 
       <fieldset>
-        <h1>Un poco más sobre ti</h1>
+        <h1>Un poco sobre ti</h1>
         <input type="text" name="pais" value={form.pais} onChange={handleChange} placeholder="País" required />
         <input type="text" name="ciudad" value={form.ciudad} onChange={handleChange} placeholder="Ciudad" required />
       </fieldset>
