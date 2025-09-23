@@ -46,27 +46,9 @@ function generateCSSFromGlobalStyles(globalStyles: any) {
     });
   }
   
-  // Extraer gradientes
-  if (colorSettings?.gradients?.theme) {
-    colorSettings.gradients.theme.forEach((gradient: any) => {
-      css += `  --wp--preset--gradient--${gradient.slug}: ${gradient.gradient};\n`;
-    });
-  }
+  // Gradientes omitidos - no se utilizan
   
-  // Extraer tipografías
-  const typographySettings = globalStyles.settings?.typography;
-  if (typographySettings?.fontFamilies?.theme) {
-    typographySettings.fontFamilies.theme.forEach((font: any) => {
-      css += `  --wp--preset--font-family--${font.slug}: ${font.fontFamily};\n`;
-    });
-  }
-  
-  // Extraer tamaños de fuente
-  if (typographySettings?.fontSizes?.theme) {
-    typographySettings.fontSizes.theme.forEach((size: any) => {
-      css += `  --wp--preset--font-size--${size.slug}: ${size.size};\n`;
-    });
-  }
+  // Tipografías omitidas - se manejan por SASS
   
   css += '}\n\n';
   
@@ -89,16 +71,7 @@ function generateCSSFromGlobalStyles(globalStyles: any) {
     });
   }
   
-  // Generar clases para gradientes
-  if (colorSettings?.gradients?.theme) {
-    colorSettings.gradients.theme.forEach((gradient: any) => {
-      css += `
-.has-${gradient.slug}-gradient-background {
-  background: var(--wp--preset--gradient--${gradient.slug}) !important;
-}
-`;
-    });
-  }
+  // Gradientes omitidos - no se utilizan
   
   return css;
 }
