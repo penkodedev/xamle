@@ -87,6 +87,12 @@ export default function FormMain() {
         newForm.etniaDetalles = '';
       }
 
+      // Si se selecciona "Persona blanca", limpiar los detalles de etnia
+      if (name === 'etnia' && value === 'Persona blanca') {
+        newForm.etniaDetalles = '';
+        newForm.etniaOtra = '';
+      }
+
       return newForm;
     });
   };
@@ -99,10 +105,13 @@ export default function FormMain() {
     if (!form.ciudad.trim()) return 'La ciudad es obligatoria';
     if (!form.tipoCentro.trim()) return 'El tipo de centro es obligatorio';
 
+    if (form.edad === '') {
+      return 'La edad es obligatoria';
+    }
+
     // Validación de edad robusta
     const edadNum = Number(form.edad);
     if (
-      form.edad === '' ||
       isNaN(edadNum) ||
       !Number.isFinite(edadNum) ||
       edadNum < 0 ||
@@ -124,7 +133,7 @@ export default function FormMain() {
       !form.etniaDetalles &&
       !form.etniaOtra.trim()
     ) {
-      return 'Debes especificar el detalle de tu identidad étnica o describirla';
+      return 'Si te identificas como persona racializada, debes especificar el detalle o describirlo';
     }
     return null;
   };
@@ -142,12 +151,13 @@ export default function FormMain() {
     setIsSubmitting(true);
 
     const payload = {
+      nombre: 'Anónimo', // Añadimos un valor por defecto para el nombre
       email: form.email,
       genero: form.genero,
       edad: Number(form.edad),
       identidad_etnica: form.etnia,
-      sub_etnias: form.etniaDetalles ? [form.etniaDetalles] : [],
-      otra_etnia: form.etniaOtra,
+      sub_etnias: form.etnia === 'Persona racializada' ? form.etniaDetalles || '' : '',
+      otra_etnia: form.etnia === 'Persona racializada' ? form.etniaOtra : '',
       colectivo: form.colectivo,
       pais: form.pais,
       ciudad: form.ciudad,
@@ -178,7 +188,8 @@ export default function FormMain() {
 
       // Redirigir directamente sin mensaje de éxito
       router.push('/encuesta');
-    } catch {
+    } catch (error) {
+      console.error("Error en el envío del formulario:", error);
       setError('Falló el envío. Intenta más tarde.');
       setIsSubmitting(false);
     }
