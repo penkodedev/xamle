@@ -29,13 +29,13 @@ export default function HomePage() {
   }
 
   return (
-    <div className='layout-encuesta'>
+    
     <article className="home-content">
       <div
         className="wordpress-content"
         dangerouslySetInnerHTML={{ __html: pageContent }}
       />
       </article>
-      </div>
+      
   );
 }

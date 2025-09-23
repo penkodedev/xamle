@@ -1,5 +1,5 @@
 // src/app/page.tsx
-// PÁGIN DE REGISTRO
+// PÁGINA DE REGISTRO
 
 import FormText from '@/components/FormText';
 import FormMain from '@/components/FormMain';
