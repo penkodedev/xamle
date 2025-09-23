@@ -193,7 +193,7 @@ export default function FormMain() {
         <input type="text" name="pais" value={form.pais} onChange={handleChange} placeholder="País" required />
         <input type="text" name="ciudad" value={form.ciudad} onChange={handleChange} placeholder="Ciudad" required />
         <input type="text" name="edad" value={form.edad} onChange={handleChange} placeholder="Tu edad" min={0} max={120} required />
-        <small htmlFor="email">Correo electrónico (opcional).
+        <small>Correo electrónico (opcional).
           <br></br>Si deseas recibir recursos y contenido sobre educación antirracista. Tu diagnóstico seguirá siendo anónimo.</small>
         <input id="email" type="email" name="email" value={form.email} onChange={handleChange} placeholder="Tu email" />
       </fieldset>
