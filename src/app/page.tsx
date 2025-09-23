@@ -4,8 +4,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { div } from 'framer-motion/client';
 
 export default function HomePage() {
   const [pageContent, setPageContent] = useState<string>('');

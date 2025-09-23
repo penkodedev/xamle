@@ -1,14 +1,14 @@
 // src/app/layout.tsx
 
-import type { ReactNode } from "react";
 import "@/sass/main.scss";
+import type { ReactNode } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 import BodyClass from "@/utils/BodyClass";
 import CookieConsent from "@/components/CookieConsent";
 import CookieManager from "@/components/CookieManager";
-import WpStyles from "@/components/WpStyles";
+import WpStyles from "@/utils/WpStyles";
 
 export const metadata = {
   icons: {
@@ -54,9 +54,11 @@ export const viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
+      {/* Carga los estilos de WordPress aquí para que tengan prioridad */}
       <head>
         <WpStyles />
       </head>
+
       <body>
         <BodyClass />
         <Header />

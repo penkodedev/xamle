@@ -1,4 +1,4 @@
-// src/components/TextForm.tsx
+// src/components/FormText.tsx
 
 'use client';
 

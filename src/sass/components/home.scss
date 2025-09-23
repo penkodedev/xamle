@@ -11,6 +11,7 @@
 
 // Estilos para el contenido que viene de WordPress
 .wordpress-content {
+
     p,
     ul li {
         font-size: 1.27em;
@@ -21,18 +22,35 @@
         font-size: 2.7em;
     }
 
-    h1, h2, h3 {
-        margin-bottom: 0.8em;
+    h1,
+    h2,
+    h3 {
         text-align: center;
         line-height: 1.1em;
         font-weight: 800;
     }
+
+    img {
+        border-radius: 12px;
+    }
 }
 
-.page-home .home-content .wp-block-buttons  {
+.page-home .home-content .wp-block-buttons {
     font-size: 1.38em;
     line-height: 1.2em;
-     a {
+
+    a {
         padding: 15px 30px;
-     }
+    }
+
+}
+
+.page-home .texto-inicio {
+    margin-top: -30px;
+    padding: 40px;
+    border-radius: 12px;
+
+    strong {
+        color: yellow !important;
+    }
 }
