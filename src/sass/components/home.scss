@@ -1,0 +1,38 @@
+// Estilos para el contenedor principal del contenido de la home
+.home-content {
+    background-color: #fff;
+    border-radius: 30px;
+    padding: 50px 60px;
+    max-width: 950px;
+    width: 100%;
+    margin: 30px auto 0;
+    box-shadow: -1px -1px 25px -2px rgba(0, 0, 0, 0.23);
+}
+
+// Estilos para el contenido que viene de WordPress
+.wordpress-content {
+    p,
+    ul li {
+        font-size: 1.27em;
+        line-height: 1.5;
+    }
+
+    h1 {
+        font-size: 2.7em;
+    }
+
+    h1, h2, h3 {
+        margin-bottom: 0.8em;
+        text-align: center;
+        line-height: 1.1em;
+        font-weight: 800;
+    }
+}
+
+.page-home .home-content .wp-block-buttons  {
+    font-size: 1.38em;
+    line-height: 1.2em;
+     a {
+        padding: 15px 30px;
+     }
+}

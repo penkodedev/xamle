@@ -5,8 +5,10 @@ import "@/sass/main.scss";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import BodyClass from "@/utils/BodyClass";
 import CookieConsent from "@/components/CookieConsent";
 import CookieManager from "@/components/CookieManager";
+import WpStyles from "@/components/WpStyles";
 
 export const metadata = {
   icons: {
@@ -52,7 +54,11 @@ export const viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
+      <head>
+        <WpStyles />
+      </head>
       <body>
+        <BodyClass />
         <Header />
         <main>{children}</main>
         <ScrollToTop />

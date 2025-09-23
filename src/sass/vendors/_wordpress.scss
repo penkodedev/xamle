@@ -1,0 +1,11 @@
+// src/sass/vendors/_wordpress.scss
+
+/**
+ * Estilos para replicar las clases de formato del editor de WordPress (Gutenberg).
+ * Esto nos permite renderizar correctamente el contenido que viene de la API
+ * sin tener que importar la hoja de estilos completa de WordPress.
+ */
+
+.wp-block-buttons {
+  display: flex;
+}

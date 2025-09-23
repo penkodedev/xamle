@@ -2,7 +2,6 @@
 "use client";
 
 import React, { useState } from "react";
-import BodyClass from "@/utils/BodyClass";
 
 import Encuesta from "@/components/Encuesta";
 import EncuestaSidebar from "@/components/EncuestaSidebar";
@@ -29,8 +28,6 @@ export default function EncuestaPage() {
 
   return (
     <>
-      <BodyClass />
-
       <div className="layout-encuesta">
         {!mostrarMensajeFinal && (
           <aside>

@@ -4,17 +4,18 @@
 import { useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 
-// Mapa ruta -> array de clases a aplicar al body
-const routeBodyClassMap: Record<string, string[]> = {
-  "/contacto": ["page-contacto"],
-  "/encuesta": ["page-encuesta", "encuesta"],
-};
-
 const BodyClass = () => {
   const pathname = usePathname();
-  const bodyClasses = useMemo(
-    () => routeBodyClassMap[pathname] || [],
-    [pathname]);
+
+  // Genera clases dinámicamente a partir del pathname
+  const bodyClasses = useMemo(() => {
+    if (pathname === "/") {
+      return ["page-home"];
+    }
+    // Convierte "/mi-ruta/sub-ruta" en "page-mi-ruta-sub-ruta"
+    const className = `page-${pathname.substring(1).replace(/\//g, "-")}`;
+    return [className];
+  }, [pathname]);
 
   useEffect(() => {
     const body = document.body;

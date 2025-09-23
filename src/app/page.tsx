@@ -1,21 +1,43 @@
 // src/app/page.tsx
 // HOME PAGE
 
-import FormText from '../components/FormText';
-import FormMain from '../components/FormMain';
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { div } from 'framer-motion/client';
+
+export default function HomePage() {
+  const [pageContent, setPageContent] = useState<string>('');
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/wp/v2/pages?slug=inicio`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.length > 0) setPageContent(data[0].content.rendered);
+      })
+      .finally(() => setCargando(false));
+  }, []);
 
 
-export default function Home() {
+  if (cargando) {
+    return (
+      <div className="loader-overlay">
+        <div className="spinner" />
+        <p>Cargando...</p>
+      </div>
+    );
+  }
+
   return (
-
-    <article className='form-container'>
-      <section>
-      <FormText />
-      </section>
-
-      <section>
-      <FormMain />
-      </section>
-    </article>
+    <div className='layout-encuesta'>
+    <article className="home-content">
+      <div
+        className="wordpress-content"
+        dangerouslySetInnerHTML={{ __html: pageContent }}
+      />
+      </article>
+      </div>
   );
 }

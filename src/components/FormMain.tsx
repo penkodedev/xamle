@@ -4,7 +4,6 @@ import { useState, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
 type FormData = {
-  nombre: string;
   email: string;
   edad: number | '';
   pais: string;
@@ -58,7 +57,6 @@ const tipoCentroOptions = [
 
 export default function FormMain() {
   const [form, setForm] = useState<FormData>({
-    nombre: '',
     email: '',
     edad: '',
     pais: '',
@@ -94,9 +92,6 @@ export default function FormMain() {
   };
 
   const validarFormulario = () => {
-    if (!form.nombre.trim()) return 'El nombre es obligatorio';
-    if (!form.email.trim()) return 'El email es obligatorio';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return 'El email no es válido';
     if (!form.genero.trim()) return 'El género es obligatorio';
     if (!form.etnia.trim()) return 'La identidad étnica es obligatoria';
     if (!form.colectivo.trim()) return 'El colectivo es obligatorio';
@@ -114,6 +109,14 @@ export default function FormMain() {
       edadNum > 120
     ) {
       return 'La edad debe ser un número válido entre 0 y 120';
+    }
+
+    // Validación de email solo si se ha introducido algo
+    if (
+      form.email.trim() &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)
+    ) {
+      return 'El formato del email no es válido';
     }
 
     if (
@@ -139,7 +142,6 @@ export default function FormMain() {
     setIsSubmitting(true);
 
     const payload = {
-      nombre: form.nombre,
       email: form.email,
       genero: form.genero,
       edad: Number(form.edad),
@@ -169,8 +171,8 @@ export default function FormMain() {
       const data = await response.json();
 
       if (data.id) {
-        // Guardamos tanto el ID como el nombre para usarlo en el PDF
-        const colaboradorInfo = { id: data.id, nombre: form.nombre };
+        // Guardamos solo el ID ya que el formulario es anónimo
+        const colaboradorInfo = { id: data.id };
         localStorage.setItem('colaborador_info', JSON.stringify(colaboradorInfo));
       }
 
@@ -186,20 +188,17 @@ export default function FormMain() {
   return (
     <form className="form-main" onSubmit={handleSubmit} aria-describedby={error ? "form-error" : undefined}>
       <fieldset>
-        <h1>Datos Personales</h1>
-        <small>Todos los campos son obligatorios</small>
-        <input type="text" name="nombre" value={form.nombre} onChange={handleChange} placeholder="Tu nombre" required />
-        <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="Tu email" required />
-        <input type="text" name="edad" value={form.edad} onChange={handleChange} placeholder="Tu edad" min={0} max={120} required />
-      </fieldset>
-
-      <fieldset>
         <h1>Un poco sobre ti</h1>
+        <small>Todos los campos son obligatorios</small>
         <input type="text" name="pais" value={form.pais} onChange={handleChange} placeholder="País" required />
         <input type="text" name="ciudad" value={form.ciudad} onChange={handleChange} placeholder="Ciudad" required />
+        <input type="text" name="edad" value={form.edad} onChange={handleChange} placeholder="Tu edad" min={0} max={120} required />
+        <small htmlFor="email">Correo electrónico (opcional).
+          <br></br>Si deseas recibir recursos y contenido sobre educación antirracista. Tu diagnóstico seguirá siendo anónimo.</small>
+        <input id="email" type="email" name="email" value={form.email} onChange={handleChange} placeholder="Tu email" />
       </fieldset>
 
-      <fieldset>
+      <fieldset> 
         <legend>¿Cómo te defines desde tu identidad de género?</legend>
         {generoOptions.map(option => (
           <label key={option} style={{ marginRight: '1rem' }}>
