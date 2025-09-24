@@ -47,6 +47,9 @@ export type AmbitoData = {
 };
 
 export type RespuestaDetalladaPDF = {
+  ambitoNombre: string;
+  ambitoArea: string;
+  aspectoEvaluadoPregunta: string;
   pregunta: string;
   respuesta: string;
   comentario: string;

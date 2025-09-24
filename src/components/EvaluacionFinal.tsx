@@ -13,6 +13,7 @@ type Pregunta = {
   id: number;
   titulo: string;
   pregunta: string;
+  aspecto_evaluado: string;
   ambito: { fase: string };
   respuestas: Respuesta[];
 };
@@ -157,7 +158,7 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
       valoracionFinal: {
         titulo: valoracionFinal?.titulo || 'N/A',
         texto: valoracionFinal?.texto_valoracion || 'Sin texto',
-        recomendacion: valoracionFinal?.recomendacion || 'Sin recomendación',
+        recomendacion: valoracionFinal?.recomendacion || 'Sin recomendación final.',
       },
       graficoRadarBase64: '', // Dejamos esto vacío por ahora
       ambitos: ambitos.map((ambito): AmbitoPDF => { // Especificamos el tipo de retorno
@@ -168,7 +169,7 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
         const valoracionEncontrada = sortedValoraciones.find(v => ambito.puntuacion >= v.puntuacion_min);
         const valoracionAmbito = valoracionEncontrada 
           || sortedValoraciones[sortedValoraciones.length - 1] 
-          || { titulo: 'N/A', texto: 'Sin texto de valoración disponible.', recomendacion: 'Sin recomendación' };
+          || { titulo: 'N/A', texto: 'Sin texto de valoración disponible.', recomendacion: 'Sin recomendación para este ámbito.' };
         
         return {
           nombre: ambito.nombre,
@@ -187,10 +188,16 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
       respuestasDetalladas: preguntas.map(p => {
         const respuestaPeso = respuestasUsuario[p.id];
         const respuestaSeleccionada = p.respuestas.find(r => r.peso === respuestaPeso);
+        const ambitoCorrespondiente = ambitos.find(a => a.nombre === p.ambito.fase);
+
         return {
+          ambitoNombre: p.ambito.fase,
+          ambitoArea: ambitoCorrespondiente?.area || '',
+          aspectoEvaluadoPregunta: p.aspecto_evaluado,
           pregunta: p.pregunta,
           respuesta: respuestaSeleccionada?.texto || 'Sin respuesta',
-          comentario: respuestaSeleccionada?.valoracion_detallada || '',
+          // 'comentario' es ahora la valoración detallada de la respuesta
+          comentario: respuestaSeleccionada?.valoracion_detallada || 'Sin valoración detallada.',
         };
       }),
     };

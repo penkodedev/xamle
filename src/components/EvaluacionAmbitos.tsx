@@ -16,6 +16,7 @@ type Ambito = {
   nombre: string;
   area: string;
   puntuacion: number;
+  aspecto_evaluado: string;
   puntuacionMaxima: number;
   valoraciones: ValoracionAmbito[];
 };
@@ -62,6 +63,11 @@ export default function EvaluacionAmbitos({ ambitos, onVerEvaluacionFinal }: Eva
           return (
             <li key={ambito.nombre}>
               <h2>{ambito.nombre} - {ambito.area}</h2>
+              <div className="aspecto-evaluado-ambito">
+                <h3>Aspecto Evaluado
+                  <br></br>
+                  {ambito.aspecto_evaluado}</h3>
+              </div>
               <p className="score-animado">
                 Tu puntuación ha sido <span className="current-score">{ambito.puntuacion}</span> de {ambito.puntuacionMaxima} puntos.
               </p>

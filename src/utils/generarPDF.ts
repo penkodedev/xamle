@@ -13,6 +13,8 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     nombreColaborador,
     puntuacionTotal,
     ambitos,
+    respuestasDetalladas,
+    valoracionFinal,
   } = datosParaPDF;
 
   const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
@@ -29,19 +31,26 @@ export function generarPDF(datosParaPDF: DatosPDF) {
   const logoHeight = 15;
 
   // Helper para añadir texto con control de saltos de página
-  const addText = (text: string, options: { fontSize?: number; fontStyle?: string; textColor?: string | number }, yOffset = 5) => {
-    // **SOLUCIÓN**: Establecer la fuente y el estilo ANTES de medir el texto.
+  const addText = (text: string, options: { fontSize?: number; fontStyle?: string; textColor?: string | number; }, yOffset = 5) => {
+    if (options.textColor) {
+      doc.setTextColor(options.textColor);
+    }
+
     doc.setFont('helvetica', options.fontStyle || 'normal');
     doc.setFontSize(options.fontSize || 10);
     const splitText = doc.splitTextToSize(text || '', pageWidth - margin * 2);
     const textDimensions = doc.getTextDimensions(splitText);
 
     if (cursorY + textDimensions.h > doc.internal.pageSize.getHeight() - margin) {
-        doc.addPage();
-        cursorY = margin;
+      doc.addPage();
+      cursorY = margin;
     }
     doc.setFontSize(options.fontSize || 10);
     doc.setFont('helvetica', options.fontStyle || 'normal');
+    if (options.textColor) {
+      doc.setTextColor(options.textColor);
+    }
+
     doc.text(splitText, margin, cursorY);
     cursorY += textDimensions.h + yOffset;
   };
@@ -52,62 +61,92 @@ export function generarPDF(datosParaPDF: DatosPDF) {
 
   // --- 1. Portada ---
   doc.addImage(logoBase64, "PNG", margin, 20, logoWidth, logoHeight);
+  doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
-  doc.text("Informe de Autoevaluación Antirracista", pageWidth / 2, 90, { align: 'center' });
+  doc.text("Informe detallado de Autoevaluación Antirracista", pageWidth / 2, 90, { align: 'center' });
   
   doc.setFontSize(14);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Colaborador/a: ${nombreColaborador || "No disponible"}`, pageWidth / 2, 110, { align: 'center' });
+  // Se quita la línea del colaborador
   
   doc.setFontSize(10);
   doc.setTextColor(150);
   doc.text(new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }), pageWidth / 2, 120, { align: 'center' });
 
-  // --- 2. Detalle por Ámbito ---
+  // --- 2. EVALUACIÓN DETALLADA ---
   doc.addPage();
-  cursorY = margin;
-  addText("Análisis y Recomendaciones por Ámbito", { fontSize: 18, fontStyle: 'bold' }, 15);
+  cursorY = margin + 5;
+  addText("EVALUACIÓN DETALLADA", { fontSize: 18, fontStyle: 'bold', textColor: '#000000' }, 10);
 
+  // Agrupar respuestas por ámbito
+  const respuestasPorAmbito: { [key: string]: typeof respuestasDetalladas } = {};
+  respuestasDetalladas.forEach(respuesta => {
+    if (!respuestasPorAmbito[respuesta.ambitoNombre]) {
+      respuestasPorAmbito[respuesta.ambitoNombre] = [];
+    }
+    respuestasPorAmbito[respuesta.ambitoNombre].push(respuesta);
+  });
+
+  // Iterar sobre los ámbitos en el orden original
   ambitos.forEach(ambito => {
-    // --- INICIO DE LA CORRECCIÓN DE FORMATO ---
-    // Función para dibujar un ámbito completo
-    const dibujarAmbito = () => {
-      // Nombre del Ámbito y Área
-      addText(`${ambito.nombre} (${ambito.area})`, { fontSize: 14, fontStyle: 'bold', textColor: '#313131' }, 10);
-      
-      // Aspecto Evaluado
-      addText('Aspecto Evaluado:', { fontSize: 11, fontStyle: 'bold' }, 5);
-      addText(ambito.valoracion.texto, { fontSize: 10 }, 10);
-      
-      // Recomendación para PDF
-      if (ambito.recomendacion && typeof ambito.recomendacion === 'string') {
-          addText('Recomendaciones:', { fontSize: 11, fontStyle: 'bold' }, 5);
-          const textoPlano = ambito.recomendacion
-              .replace(/<br\s*\/?>/gi, '\n')
-              .replace(/<\/p>/gi, '\n')
-              .replace(/<[^>]+>/g, '')
-              .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
-              .trim();
-          addText(textoPlano, { fontSize: 10, fontStyle: 'normal' }, 10);
-      }
-    };
+    const ambitoNombre = ambito.nombre;
+    const respuestasDelAmbito = respuestasPorAmbito[ambitoNombre];
+    if (!respuestasDelAmbito || respuestasDelAmbito.length === 0) return;
 
-    // 1. Intento de dibujado para ver si cabe
-    const yFinEstimado = cursorY + 100; // Una estimación conservadora
-    if (yFinEstimado > doc.internal.pageSize.getHeight() - margin) {
+    if (cursorY + 30 > doc.internal.pageSize.getHeight() - margin) {
       doc.addPage();
       cursorY = margin;
     }
 
-    // 2. Dibujar el ámbito
-    dibujarAmbito();
+    addText(`${ambito.nombre}`, { fontSize: 14, fontStyle: 'bold', textColor: '#000000' }, 8);
 
-    // 3. Añadir separador y espacio para el siguiente
-    doc.setDrawColor(220); // Gris más claro
-    doc.line(margin, cursorY + 5, pageWidth - margin, cursorY + 5);
-    cursorY += 15; // Espacio después del separador
-    // --- FIN DE LA CORRECCIÓN DE FORMATO ---
+    respuestasDelAmbito.forEach(respuesta => {
+      if (cursorY + 25 > doc.internal.pageSize.getHeight() - margin) {
+        doc.addPage();
+        cursorY = margin;
+      }
+      addText(respuesta.aspectoEvaluadoPregunta, { fontSize: 11, fontStyle: 'bold', textColor: '#000000' }, 3);
+      addText(respuesta.comentario, { fontSize: 10, textColor: '#333333' }, 8); // 'comentario' es la valoración detallada
+    });
+
+    cursorY += 5; // Espacio extra entre ámbitos
   });
+
+  // --- 3. RECOMENDACIONES ---
+  doc.addPage();
+  cursorY = margin + 5;
+  addText("RECOMENDACIONES", { fontSize: 18, fontStyle: 'bold', textColor: '#000000' }, 10);
+
+  ambitos.forEach(ambito => {
+    if (cursorY + 30 > doc.internal.pageSize.getHeight() - margin) {
+      doc.addPage();
+      cursorY = margin;
+    }
+
+    addText(`${ambito.nombre}`, { fontSize: 14, fontStyle: 'bold', textColor: '#000000' }, 8);
+
+    if (ambito.recomendacion && typeof ambito.recomendacion === 'string') {
+      const textoPlano = ambito.recomendacion
+        .replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<[^>]+>/g, '')
+        .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
+      addText(textoPlano, { fontSize: 10, fontStyle: 'normal', textColor: '#333333' }, 10);
+    }
+  });
+
+  // Recomendación Final
+  if (cursorY + 30 > doc.internal.pageSize.getHeight() - margin) {
+    doc.addPage();
+    cursorY = margin;
+  }
+  addText("RECOMENDACIÓN FINAL", { fontSize: 14, fontStyle: 'bold', textColor: '#000000' }, 8);
+  if (valoracionFinal.recomendacion && typeof valoracionFinal.recomendacion === 'string') {
+    const textoPlano = valoracionFinal.recomendacion
+      .replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<[^>]+>/g, '')
+      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
+    addText(textoPlano, { fontSize: 10, fontStyle: 'normal', textColor: '#333333' }, 8);
+  } else {
+    addText("No hay una recomendación final disponible.", { fontSize: 10, fontStyle: 'italic', textColor: '#333333' }, 8);
+  }
 
   // --- Pie de página ---
   const pageCount = doc.getNumberOfPages();
