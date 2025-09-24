@@ -3,6 +3,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 export default function LogoHeader() {
@@ -18,24 +19,28 @@ export default function LogoHeader() {
 
  return (
   <div id="logo-container">
-    <Image
-      src="/xamle-logo.png"
-      alt="Autodiagnóstico antirracista para reflexionar y transformar tu prácticadocente"
-      width={124}
-      height={63}
-      priority
-      className="logo-xamle-header"
-    />
+    <Link href="/" aria-label="Ir a la página de inicio">
+      <Image
+        src="/xamle-logo.png"
+        alt="Autodiagnóstico antirracista para reflexionar y transformar tu prácticadocente"
+        width={124}
+        height={63}
+        priority
+        className="logo-xamle-header"
+      />
+    </Link>
     
      <div className="logo-mad-wrapper">
-      <Image
-        src="/madafrica-logo-small.png"
-        alt="MAD África | Movimiento por la Acción y el Desarrollo de África"
-        width={77}
-      height={63}
-        priority
-        className="logo-mad-header"
-      />
+      <a href="https://www.madafrica.es" target="_blank" rel="noopener noreferrer" aria-label="Ir a la web de MAD África (se abre en una nueva pestaña)">
+        <Image
+          src="/madafrica-logo-small.png"
+          alt="MAD África | Movimiento por la Acción y el Desarrollo de África"
+          width={77}
+          height={63}
+          priority
+          className="logo-mad-header"
+        />
+      </a>
      </div>
 
     <p className="header-desc">
