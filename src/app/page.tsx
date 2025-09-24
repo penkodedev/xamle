@@ -30,7 +30,7 @@ export default function HomePage() {
 
   return (
     
-    <article className="home-content">
+    <article className="form-container">
       <div
         className="wordpress-content"
         dangerouslySetInnerHTML={{ __html: pageContent }}
