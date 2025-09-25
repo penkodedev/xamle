@@ -13,7 +13,6 @@ type ValoracionAmbito = {
 
 type AmbitoData = {
   nombre: string;
-  area: string;
   puntuacion: number;
   puntuacionMaxima: number;
   valoraciones: ValoracionAmbito[];

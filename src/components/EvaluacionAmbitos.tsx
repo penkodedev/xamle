@@ -14,7 +14,6 @@ type ValoracionAmbito = {
 // El tipo para cada ámbito calculado, que incluye los datos de la API
 type Ambito = {
   nombre: string;
-  area: string;
   puntuacion: number;
   aspecto_evaluado: string;
   puntuacionMaxima: number;
