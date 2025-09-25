@@ -33,7 +33,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
   // Helper para añadir texto con control de saltos de página
   const addText = (text: string, options: { fontSize?: number; fontStyle?: string; textColor?: string | number; }, yOffset = 5) => {
     if (options.textColor) {
-      doc.setTextColor(options.textColor);
+      doc.setTextColor(String(options.textColor));
     }
 
     doc.setFont('helvetica', options.fontStyle || 'normal');
@@ -48,7 +48,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     doc.setFontSize(options.fontSize || 10);
     doc.setFont('helvetica', options.fontStyle || 'normal');
     if (options.textColor) {
-      doc.setTextColor(options.textColor);
+      doc.setTextColor(String(options.textColor));
     }
 
     doc.text(splitText, margin, cursorY);
