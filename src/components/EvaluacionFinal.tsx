@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { generarPDF } from "@/utils/generarPDF";
-import { generarPDF } from '@/utils/generarPDF';
 import { DatosPDF, AmbitoPDF, Pregunta } from '@/types/index'; // Importamos Pregunta desde la fuente única
 
 type ValoracionAmbito = {
