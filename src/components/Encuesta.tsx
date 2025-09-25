@@ -4,21 +4,8 @@ import React, { useEffect, useReducer, useCallback, useMemo } from "react";
 import ResultadoAmbito from "./ResultadoAmbito";
 import EvaluacionAmbitos from "./EvaluacionAmbitos";
 import EvaluacionFinal from "./EvaluacionFinal";
-import { motion, AnimatePresence } from "framer-motion";
-
-type Respuesta = {
-  id: number;
-  texto: string;
-  peso: number;
-};
-
-type Pregunta = {
-  id: number;
-  titulo: string;
-  pregunta: string;
-  ambito: { fase: string };
-  respuestas: Respuesta[];
-};
+import { motion, AnimatePresence } from 'framer-motion';
+import { Pregunta } from '@/types'; // Importar el tipo unificado
 
 type ValoracionAmbito = {
   nivel: string;

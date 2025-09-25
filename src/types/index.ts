@@ -2,12 +2,14 @@ export type Respuesta = {
   id: number;
   texto: string;
   peso: number;
+  valoracion_detallada?: string;
 };
 
 export type Pregunta = {
   id: number;
   titulo: string;
   pregunta: string;
+  aspecto_evaluado: string;
   ambito: { fase: string };
   respuestas: Respuesta[];
 };

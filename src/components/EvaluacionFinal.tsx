@@ -1,22 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { generarPDF } from "@/utils/generarPDF";
-import { DatosPDF, AmbitoPDF } from "@/types/index"; // Importamos desde la fuente única
-
-type Respuesta = {
-  id: number;
-  texto: string;
-  peso: number;
-  valoracion_detallada?: string; // Añadimos la propiedad que falta como opcional
-};
-
-type Pregunta = {
-  id: number;
-  titulo: string;
-  pregunta: string;
-  aspecto_evaluado: string;
-  ambito: { fase: string };
-  respuestas: Respuesta[];
-};
+import { generarPDF } from '@/utils/generarPDF';
+import { DatosPDF, AmbitoPDF, Pregunta } from '@/types/index'; // Importamos Pregunta desde la fuente única
 
 type ValoracionAmbito = {
   nivel: string;
