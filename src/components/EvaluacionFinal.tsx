@@ -157,7 +157,6 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
         
         return {
           nombre: ambito.nombre,
-          area: ambito.area,
           aspecto_evaluado: ambito.aspecto_evaluado,
           puntuacion: ambito.puntuacion,
           puntuacionMaxima: ambito.puntuacionMaxima,
@@ -172,11 +171,10 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
       respuestasDetalladas: preguntas.map(p => {
         const respuestaPeso = respuestasUsuario[p.id];
         const respuestaSeleccionada = p.respuestas.find(r => r.peso === respuestaPeso);
-        const ambitoCorrespondiente = ambitos.find(a => a.nombre === p.ambito.fase);
 
         return {
           ambitoNombre: p.ambito.fase,
-          ambitoArea: ambitoCorrespondiente?.area || '',
+          ambitoArea: '', // Este campo ya no es necesario
           aspectoEvaluadoPregunta: p.aspecto_evaluado,
           pregunta: p.pregunta,
           respuesta: respuestaSeleccionada?.texto || 'Sin respuesta',
@@ -208,7 +206,7 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
       <ul className="listado-result-amb final">
         {ambitos.map((ambito, idx) => (
           <li key={ambito.nombre}>
-            <p>Has sumado <strong>{animatedScores[idx]}</strong> puntos en el ámbito <strong>{ambito.nombre}</strong> - {ambito.area}</p>
+            <p>Has sumado <strong>{animatedScores[idx]}</strong> puntos en el ámbito <strong>{ambito.nombre}</strong> - {ambito.aspecto_evaluado}</p>
             <div className="progress-bar-animada-container">
               <div
                 className="progress-bar-animada"

@@ -62,7 +62,7 @@ export default function EvaluacionAmbitos({ ambitos, onVerEvaluacionFinal }: Eva
           const valoracion = getValoracionParaAmbito(ambito); // Usamos la nueva función simplificada
           return (
             <li key={ambito.nombre}>
-              <h2>{ambito.nombre} - {ambito.area}</h2>
+              <h2>{ambito.nombre} - {ambito.aspecto_evaluado}</h2>
               <div className="aspecto-evaluado-ambito">                
                 <h3>Aspecto Evaluado</h3>
                 <p>{ambito.aspecto_evaluado}</p>

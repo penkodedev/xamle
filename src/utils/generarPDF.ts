@@ -203,7 +203,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
       cursorY = margin;
     }
 
-    addText(`${ambito.nombre} - ${ambito.area}`, { fontSize: 14, fontStyle: 'bold', textColor: '#000000' }, 5);
+    addText(`${ambito.nombre} - ${ambito.aspecto_evaluado}`, { fontSize: 14, fontStyle: 'bold', textColor: '#000000' }, 5);
 
     respuestasDelAmbito.forEach(respuesta => {
       if (cursorY + 25 > doc.internal.pageSize.getHeight() - margin) {
@@ -230,7 +230,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
       cursorY = margin;
     }
 
-    addText(`${ambito.nombre} - ${ambito.area}`, { fontSize: 14, fontStyle: 'bold', textColor: '#000000' }, 8);
+    addText(`${ambito.nombre} - ${ambito.aspecto_evaluado}`, { fontSize: 14, fontStyle: 'bold', textColor: '#000000' }, 8);
 
     if (ambito.recomendacion && typeof ambito.recomendacion === 'string') {
       addTextWithBold(ambito.recomendacion, { fontSize: 10, textColor: '#333333' }, 10);
