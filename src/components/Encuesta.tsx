@@ -134,7 +134,6 @@ export default function Encuesta({ onAmbitoChange, onMostrarMensajeFinalChange, 
         const puntuacionMaxima = preguntasDeAmbito.reduce((acc, p) => acc + Math.max(...p.respuestas.map((r) => r.peso)), 0); // Suma de puntos máximos posibles
         
         return {
-            ...ambitoInfo,
             nombre: ambitoInfo?.nombre ?? nombre,
             area: ambitoInfo?.area ?? '',
             aspecto_evaluado: ambitoInfo?.aspecto_evaluado ?? '',
