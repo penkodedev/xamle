@@ -1,41 +1,62 @@
 // src/app/page.tsx
 // HOME PAGE
 
-'use client';
+// 'use client';
 
-import { useEffect, useState } from 'react';
+// import { useEffect, useState } from 'react';
 
-export default function HomePage() {
-  const [pageContent, setPageContent] = useState<string>('');
-  const [cargando, setCargando] = useState(true);
+// export default function HomePage() {
+//   const [pageContent, setPageContent] = useState<string>('');
+//   const [cargando, setCargando] = useState(true);
 
-  useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/wp/v2/pages?slug=inicio`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.length > 0) setPageContent(data[0].content.rendered);
-      })
-      .finally(() => setCargando(false));
-  }, []);
+//   useEffect(() => {
+//     fetch(`${process.env.NEXT_PUBLIC_WORDPRESS_API_URL}/wp/v2/pages?slug=inicio`)
+//       .then(res => res.json())
+//       .then(data => {
+//         if (data.length > 0) setPageContent(data[0].content.rendered);
+//       })
+//       .finally(() => setCargando(false));
+//   }, []);
 
 
-  if (cargando) {
-    return (
-      <div className="loader-overlay">
-        <div className="spinner" />
-        <p>Cargando...</p>
-      </div>
-    );
-  }
+//   if (cargando) {
+//     return (
+//       <div className="loader-overlay">
+//         <div className="spinner" />
+//         <p>Cargando...</p>
+//       </div>
+//     );
+//   }
 
-  return (
+//   return (
     
-    <article className="form-container">
-      <div
-        className="wordpress-content"
-        dangerouslySetInnerHTML={{ __html: pageContent }}
-      />
-      </article>
+//     <article className="form-container">
+//       <div
+//         className="wordpress-content"
+//         dangerouslySetInnerHTML={{ __html: pageContent }}
+//       />
+//       </article>
       
+//   );
+// }
+
+
+
+import FormText from '@/components/FormText';
+import FormMain from '@/components/FormMain';
+
+
+export default function Home() {
+  return (
+
+    <article className='form-container'>
+      <section>
+      <FormText />
+      </section>
+
+      <section>
+      <FormMain />
+      </section>
+    </article>
   );
 }

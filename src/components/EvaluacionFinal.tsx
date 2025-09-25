@@ -199,6 +199,7 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
     window.location.href = "/";
   }
 
+
   // ********************** EMPEZAMOS EL RETURN PARA MONTAR EL HTML ************************************* //
   return (
     <section className="resultado-container">
@@ -223,7 +224,7 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
       </div>
 
       <div className="resultado-desc fade-in">
-        <p>Obtuviste una valoración final de <strong>{valoracionFinal?.titulo || 'Calculando...'}</strong></p>
+        <p>Tu punto de partida es <strong>{valoracionFinal?.titulo || 'Calculando...'}</strong></p>
       </div>
 
       <div className="texto-eval-final">

@@ -55,15 +55,118 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     cursorY += textDimensions.h + yOffset;
   };
 
+  // Helper para añadir texto que puede contener negritas (<strong> o <b>)
+  const addTextWithBold = (text: string, options: { fontSize?: number; textColor?: string | number; }, yOffset = 5) => {
+    const { fontSize = 10, textColor = '#333333' } = options;
+    const lineHeight = doc.getLineHeight() / doc.internal.scaleFactor;
+    let cursorX = margin;
+
+    // 1. Decodificar entidades HTML y normalizar saltos de línea y listas
+    const decodedText = text
+      .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<li>/gi, '\n• ') // Convertir <li> en un punto de lista
+      .replace(/<\/li>/gi, '')   // Eliminar la etiqueta de cierre
+      .replace(/<ul>/gi, '\n')   // Añadir un salto de línea antes de la lista
+      .replace(/<\/ul>/gi, '');  // Eliminar la etiqueta de cierre
+
+    // 2. Reemplazar etiquetas de formato por delimitadores
+    const processedText = decodedText
+      .replace(/<strong>|<\/strong>|<b>|<\/b>/g, '%%') // Negrita
+      .replace(/<i>|<\/i>|<em>|<\/em>/g, '##'); // Itálica
+
+    doc.setFontSize(fontSize);
+    doc.setTextColor(String(textColor));
+
+    // 3. Función para renderizar segmentos de texto
+    const renderSegment = (segment: string, currentStyle: { isBold: boolean, isItalic: boolean }) => {
+      // Eliminar cualquier etiqueta HTML restante
+      const plainSegment = segment.replace(/<[^>]+>/g, '');
+      if (!plainSegment) return;
+
+      let fontStyle = 'normal';
+      if (currentStyle.isBold && currentStyle.isItalic) fontStyle = 'bolditalic';
+      else if (currentStyle.isBold) fontStyle = 'bold';
+      else if (currentStyle.isItalic) fontStyle = 'italic';
+
+      doc.setFont('helvetica', fontStyle);
+
+      // Manejar saltos de línea dentro del segmento
+      const lines = plainSegment.split('\n');
+      lines.forEach((line, lineIndex) => {
+        if (lineIndex > 0) {
+          cursorY += lineHeight;
+          cursorX = margin;
+        }
+        const words = line.split(/\s+/);
+
+        words.forEach(word => {
+          if (!word) return;
+          const wordWidth = doc.getTextWidth(word + ' ');
+          if (cursorX + wordWidth > pageWidth - margin) {
+            cursorY += lineHeight;
+            cursorX = margin;
+            if (cursorY > doc.internal.pageSize.getHeight() - margin) {
+              doc.addPage();
+              cursorY = margin;
+            }
+          }
+          doc.text(word, cursorX, cursorY);
+          cursorX += doc.getTextWidth(word + ' ');
+        });
+      });
+    };
+
+    // 4. Procesar el texto por partes
+    const style = { isBold: false, isItalic: false };
+    processedText.split('%%').forEach((boldPart, index) => {
+      style.isBold = index % 2 !== 0;
+      boldPart.split('##').forEach((italicPart, j_index) => {
+        style.isItalic = j_index % 2 !== 0;
+        renderSegment(italicPart, style);
+      });
+    });
+
+    // Mover el cursor a la siguiente línea después de terminar
+    cursorY += lineHeight + yOffset;
+  };
+
+  // Helper para añadir un título con fondo de color
+  const addTitleWithBackground = (titleText: string) => {
+    const titleFontSize = 20;
+    const paddingV = 4; // Padding vertical reducido
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(titleFontSize);
+    const titleWidth = doc.getTextWidth(titleText);
+    const textDimensions = doc.getTextDimensions(titleText);
+    const titleHeight = textDimensions.h;
+
+    // Comprobar si cabe en la página actual
+    if (cursorY + titleHeight + paddingV * 2 > doc.internal.pageSize.getHeight() - margin) {
+      doc.addPage();
+      cursorY = margin;
+    }
+
+    doc.setFillColor('#FFB41D');
+    doc.rect(margin, cursorY, pageWidth - margin * 2, titleHeight + paddingV * 2, 'F');
+    
+    doc.setTextColor('#000000');
+    doc.text(titleText, (pageWidth - titleWidth) / 2, cursorY + titleHeight / 2 + paddingV + 2);
+    cursorY += titleHeight + paddingV * 2 + 8; // Mover cursorY después del bloque
+  };
+
   // ==================================================================
   // CONSTRUCCIÓN DEL PDF
   // ==================================================================
 
-  // --- 1. Portada ---
+  // --- 1. PORTADA ---
   doc.addImage(logoBase64, "PNG", margin, 20, logoWidth, logoHeight);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
-  doc.text("Informe detallado de Autoevaluación Antirracista", pageWidth / 2, 90, { align: 'center' });
+  doc.text(["Informe detallado de", "Autoevaluación Antirracista"], pageWidth / 2, 90, { align: 'center' });
   
   doc.setFontSize(14);
   doc.setFont('helvetica', 'normal');
@@ -73,10 +176,12 @@ export function generarPDF(datosParaPDF: DatosPDF) {
   doc.setTextColor(150);
   doc.text(new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }), pageWidth / 2, 120, { align: 'center' });
 
+
+
   // --- 2. EVALUACIÓN DETALLADA ---
   doc.addPage();
   cursorY = margin + 5;
-  addText("EVALUACIÓN DETALLADA", { fontSize: 18, fontStyle: 'bold', textColor: '#000000' }, 10);
+  addTitleWithBackground("EVALUACIÓN DETALLADA");
 
   // Agrupar respuestas por ámbito
   const respuestasPorAmbito: { [key: string]: typeof respuestasDetalladas } = {};
@@ -98,7 +203,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
       cursorY = margin;
     }
 
-    addText(`${ambito.nombre}`, { fontSize: 14, fontStyle: 'bold', textColor: '#000000' }, 8);
+    addText(`${ambito.nombre} - ${ambito.area}`, { fontSize: 14, fontStyle: 'bold', textColor: '#000000' }, 5);
 
     respuestasDelAmbito.forEach(respuesta => {
       if (cursorY + 25 > doc.internal.pageSize.getHeight() - margin) {
@@ -112,10 +217,12 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     cursorY += 5; // Espacio extra entre ámbitos
   });
 
+
+
   // --- 3. RECOMENDACIONES ---
   doc.addPage();
   cursorY = margin + 5;
-  addText("RECOMENDACIONES", { fontSize: 18, fontStyle: 'bold', textColor: '#000000' }, 10);
+  addTitleWithBackground("RECOMENDACIONES");
 
   ambitos.forEach(ambito => {
     if (cursorY + 30 > doc.internal.pageSize.getHeight() - margin) {
@@ -123,13 +230,10 @@ export function generarPDF(datosParaPDF: DatosPDF) {
       cursorY = margin;
     }
 
-    addText(`${ambito.nombre}`, { fontSize: 14, fontStyle: 'bold', textColor: '#000000' }, 8);
+    addText(`${ambito.nombre} - ${ambito.area}`, { fontSize: 14, fontStyle: 'bold', textColor: '#000000' }, 8);
 
     if (ambito.recomendacion && typeof ambito.recomendacion === 'string') {
-      const textoPlano = ambito.recomendacion
-        .replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<[^>]+>/g, '')
-        .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
-      addText(textoPlano, { fontSize: 10, fontStyle: 'normal', textColor: '#333333' }, 10);
+      addTextWithBold(ambito.recomendacion, { fontSize: 10, textColor: '#333333' }, 10);
     }
   });
 
@@ -138,17 +242,20 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     doc.addPage();
     cursorY = margin;
   }
-  addText("RECOMENDACIÓN FINAL", { fontSize: 14, fontStyle: 'bold', textColor: '#000000' }, 8);
+
+  addTitleWithBackground("RECOMENDACIÓN FINAL");
+
   if (valoracionFinal.recomendacion && typeof valoracionFinal.recomendacion === 'string') {
-    const textoPlano = valoracionFinal.recomendacion
-      .replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<[^>]+>/g, '')
-      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
-    addText(textoPlano, { fontSize: 10, fontStyle: 'normal', textColor: '#333333' }, 8);
+    // Usar la función addTextWithBold para renderizar el texto
+    addTextWithBold(valoracionFinal.recomendacion, { fontSize: 10, textColor: '#333333' }, 8);
+
   } else {
     addText("No hay una recomendación final disponible.", { fontSize: 10, fontStyle: 'italic', textColor: '#333333' }, 8);
   }
 
-  // --- Pie de página ---
+
+
+  // --- PIE DE PÁGINA ---
   const pageCount = doc.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
