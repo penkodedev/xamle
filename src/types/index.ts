@@ -30,7 +30,7 @@ export type ValoracionAmbitoPDF = {
 
 export type AmbitoPDF = {
   nombre: string;
-  area: string;
+  //area: string;
   aspecto_evaluado: string;
   puntuacion: number;
   puntuacionMaxima: number;
