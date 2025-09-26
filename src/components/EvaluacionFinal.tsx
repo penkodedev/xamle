@@ -161,6 +161,7 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
           puntuacionMaxima: ambito.puntuacionMaxima,
           valoracion: {
             titulo: valoracionAmbito.titulo,
+            // Pasamos el texto de valoración del ámbito al PDF
             texto: valoracionAmbito.texto,
           },
           recomendacion: valoracionAmbito.recomendacion,

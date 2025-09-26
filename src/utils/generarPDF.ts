@@ -226,6 +226,10 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     doc.text(splitTitle, margin + paddingH, cursorY + paddingV + textDimensions.h / splitTitle.length);
     cursorY += blockHeight + 5; // Mover cursorY después del bloque
 
+    // --- Añadir Título y Texto de Valoración del Ámbito ---
+    addText(ambito.valoracion.titulo, { fontSize: 12, fontStyle: 'bold', textColor: '#000000' }, 3);
+    addText(ambito.valoracion.texto, { fontSize: 10, textColor: '#333333' }, 8);
+
     respuestasDelAmbito.forEach(respuesta => {
       if (cursorY + 25 > doc.internal.pageSize.getHeight() - margin) {
         doc.addPage();
