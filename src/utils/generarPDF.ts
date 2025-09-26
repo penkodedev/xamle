@@ -18,7 +18,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
   } = datosParaPDF;
 
   const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-  const margin = 14;
+  const margin = 20;
   const pageWidth = doc.internal.pageSize.getWidth();
   let cursorY = 10;
 
@@ -61,76 +61,102 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     const lineHeight = doc.getLineHeight() / doc.internal.scaleFactor;
     let cursorX = margin;
 
-    // 1. Decodificar entidades HTML y normalizar saltos de línea y listas
-    const decodedText = text
+    // 1. Decodificar entidades HTML y reemplazar etiquetas de formato por delimitadores
+    let processedText = text
       .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
       .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
-      .replace(/<br\s*\/?>/gi, '\n')
-      .replace(/<\/p>/gi, '\n')
-      .replace(/<li>/gi, '\n• ') // Convertir <li> en un punto de lista
-      .replace(/<\/li>/gi, '')   // Eliminar la etiqueta de cierre
-      .replace(/<ul>/gi, '\n')   // Añadir un salto de línea antes de la lista
-      .replace(/<\/ul>/gi, '');  // Eliminar la etiqueta de cierre
-
-    // 2. Reemplazar etiquetas de formato por delimitadores
-    const processedText = decodedText
+      // Reemplazar etiquetas <a> por un delimitador especial que contiene la URL y el texto
+      .replace(/<a\s+(?:[^>]*?\s+)?href="([^"]*)"[^>]*?>(.*?)<\/a>/gi, '%%LINK:$1%%$2%%/LINK%%')
       .replace(/<strong>|<\/strong>|<b>|<\/b>/g, '%%') // Negrita
       .replace(/<i>|<\/i>|<em>|<\/em>/g, '##'); // Itálica
+
+    // 2. Convertir etiquetas de bloque y listas a un marcador de salto de línea único y fiable
+    processedText = processedText
+      .replace(/<\/p>|<br\s*\/?>|<\/ul>|<\/li>/gi, '[BR]') // Párrafos, saltos de línea y fin de listas
+      .replace(/<\/span>/gi, '[BR]') // Tratar el fin de span como un posible salto de párrafo
+      .replace(/<li[^>]*>/gi, '[BR]• ') // Listas
+      .replace(/<[^>]+>/g, ''); // Eliminar todas las demás etiquetas HTML
+    
+    // 3. Limpiar múltiples marcadores y espacios para un espaciado consistente
+    processedText = processedText.replace(/(\s*\[BR\]\s*){2,}/g, '[BR]').replace(/\s+/g, ' ').trim();
 
     doc.setFontSize(fontSize);
     doc.setTextColor(String(textColor));
 
-    // 3. Función para renderizar segmentos de texto
+    // 4. Función para renderizar segmentos de texto, ahora con la nueva lógica
     const renderSegment = (segment: string, currentStyle: { isBold: boolean, isItalic: boolean }) => {
-      // Eliminar cualquier etiqueta HTML restante
-      const plainSegment = segment.replace(/<[^>]+>/g, '');
-      if (!plainSegment) return;
+      if (!segment) return;
 
       let fontStyle = 'normal';
-      if (currentStyle.isBold && currentStyle.isItalic) fontStyle = 'bolditalic';
-      else if (currentStyle.isBold) fontStyle = 'bold';
+      if (currentStyle.isBold && currentStyle.isItalic) {
+        fontStyle = 'bolditalic';
+      } else if (currentStyle.isBold) fontStyle = 'bold';
       else if (currentStyle.isItalic) fontStyle = 'italic';
-
       doc.setFont('helvetica', fontStyle);
 
-      // Manejar saltos de línea dentro del segmento
-      const lines = plainSegment.split('\n');
-      lines.forEach((line, lineIndex) => {
-        if (lineIndex > 0) {
+      // Dividir por nuestro marcador de salto de línea [BR] y espacios
+      const parts = segment.split(/(\[BR\]|\s+|%%LINK:.*?%%.*?%%\/LINK%%)/g).filter(Boolean);
+
+      parts.forEach(part => {
+        if (part === '[BR]') {
+          cursorY += lineHeight; // Salto de línea simple
+          cursorX = margin;
+          return;
+        }
+
+        // Lógica para enlaces
+        if (part.startsWith('%%LINK:')) {
+          const linkData = part.match(/%%LINK:(.*?)%%(.*?)%%\/LINK%%/);
+          if (linkData) {
+            const linkText = linkData[2];
+            const linkUrl = linkData[1];
+            const linkWidth = doc.getTextWidth(linkText);
+
+            if (cursorX + linkWidth > pageWidth - margin && cursorX > margin) {
+              cursorY += lineHeight;
+              cursorX = margin;
+            }
+            doc.setTextColor('#0000FF');
+            doc.setFont('helvetica', 'normal'); // Los enlaces no heredan estilo
+            doc.textWithLink(linkText, cursorX, cursorY, { url: linkUrl });
+            doc.line(cursorX, cursorY + 1.2, cursorX + linkWidth, cursorY + 1.2); // Subrayado manual
+            doc.setTextColor(String(textColor)); // Restaurar color
+            cursorX += linkWidth;
+            return;
+          }
+        }
+
+        // Lógica para palabras normales y espacios
+        const wordWidth = doc.getTextWidth(part);
+        if (cursorX + wordWidth > pageWidth - margin && cursorX > margin) {
           cursorY += lineHeight;
           cursorX = margin;
         }
-        const words = line.split(/\s+/);
-
-        words.forEach(word => {
-          if (!word) return;
-          const wordWidth = doc.getTextWidth(word + ' ');
-          if (cursorX + wordWidth > pageWidth - margin) {
-            cursorY += lineHeight;
-            cursorX = margin;
-            if (cursorY > doc.internal.pageSize.getHeight() - margin) {
-              doc.addPage();
-              cursorY = margin;
-            }
-          }
-          doc.text(word, cursorX, cursorY);
-          cursorX += doc.getTextWidth(word + ' ');
-        });
+        // Si es un espacio al inicio de una nueva línea, no lo pintamos
+        if (part.trim() === '' && cursorX === margin) {
+            return;
+        }
+        doc.text(part, cursorX, cursorY);
+        cursorX += wordWidth;
       });
     };
 
-    // 4. Procesar el texto por partes
+    // 5. Procesar el texto por partes, ahora con el formato correcto
     const style = { isBold: false, isItalic: false };
     processedText.split('%%').forEach((boldPart, index) => {
-      style.isBold = index % 2 !== 0;
+      if (boldPart.startsWith('LINK:')) {
+        renderSegment('%%' + boldPart, style);
+        return;
+      }
+      style.isBold = index % 2 !== 0; // Alternar negrita
       boldPart.split('##').forEach((italicPart, j_index) => {
         style.isItalic = j_index % 2 !== 0;
         renderSegment(italicPart, style);
       });
     });
-
-    // Mover el cursor a la siguiente línea después de terminar
-    cursorY += lineHeight + yOffset;
+    
+    // Salto de línea final después del bloque de texto
+    cursorY += yOffset;
   };
 
   // Helper para añadir un título con fondo de color
@@ -150,12 +176,13 @@ export function generarPDF(datosParaPDF: DatosPDF) {
       cursorY = margin;
     }
 
+    const borderRadius = 2; // El mismo border-radius que los bloques grises
     doc.setFillColor('#FFB41D');
-    doc.rect(margin, cursorY, pageWidth - margin * 2, titleHeight + paddingV * 2, 'F');
+    doc.roundedRect(margin, cursorY, pageWidth - margin * 2, titleHeight + paddingV * 2, borderRadius, borderRadius, 'F');
     
     doc.setTextColor('#000000');
-    doc.text(titleText, (pageWidth - titleWidth) / 2, cursorY + titleHeight / 2 + paddingV + 2);
-    cursorY += titleHeight + paddingV * 2 + 8; // Mover cursorY después del bloque
+    doc.text(titleText, (pageWidth - titleWidth) / 2, cursorY + titleHeight / 2 + paddingV + 1.5); // Pequeño ajuste vertical para centrar mejor
+    cursorY += titleHeight + paddingV * 2 + 4; // Reducimos el margen inferior
   };
 
   // ==================================================================
@@ -205,30 +232,55 @@ export function generarPDF(datosParaPDF: DatosPDF) {
 
     // --- Bloque para el título del ámbito con fondo ---
     const ambitoTitle = `${ambito.nombre} - ${ambito.aspecto_evaluado}`;
-    const paddingH = 3; // Padding horizontal (similar a 10px)
-    const paddingV = 2; // Padding vertical (similar a 5px)
-    const borderRadius = 3; // Border radius (similar a 8px)
+    const paddingH = 4;
+    const paddingV = 4;
+    const borderRadius = 2;
+    const contentWidth = pageWidth - margin * 2 - paddingH * 2;
+    let totalTextHeight = 0;
 
+    // Calcular altura del título del ámbito
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
-    
-    // Calcular dimensiones del texto para el fondo
-    const splitTitle = doc.splitTextToSize(ambitoTitle, pageWidth - margin * 2 - paddingH * 2);
-    const textDimensions = doc.getTextDimensions(splitTitle);
-    const blockHeight = textDimensions.h + paddingV * 2;
+    const splitAmbitoTitle = doc.splitTextToSize(ambitoTitle, contentWidth - paddingH * 2);
+    totalTextHeight += doc.getTextDimensions(splitAmbitoTitle).h;
 
-    // Dibujar el fondo redondeado
+    // Calcular altura del título de valoración
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    const splitValoracionTitle = doc.splitTextToSize(ambito.valoracion.titulo, contentWidth - paddingH * 2);
+    totalTextHeight += doc.getTextDimensions(splitValoracionTitle).h + 3; // Espacio antes
+
+    // Calcular altura del texto de valoración
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    const splitValoracionText = doc.splitTextToSize(ambito.valoracion.texto, contentWidth - paddingH * 2);
+    totalTextHeight += doc.getTextDimensions(splitValoracionText).h + 2; // Espacio antes
+
+    const blockHeight = totalTextHeight + paddingV * 2;
+
+    // Dibujar el fondo gris redondeado con la altura total calculada
     doc.setFillColor('#efefef');
     doc.roundedRect(margin, cursorY, pageWidth - margin * 2, blockHeight, borderRadius, borderRadius, 'F');
 
-    // Escribir el texto sobre el fondo
+    // Escribir los textos uno debajo del otro dentro del bloque
+    let blockContentCursorY = cursorY + paddingV;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
     doc.setTextColor('#000000');
-    doc.text(splitTitle, margin + paddingH, cursorY + paddingV + textDimensions.h / splitTitle.length);
-    cursorY += blockHeight + 5; // Mover cursorY después del bloque
+    doc.text(splitAmbitoTitle, margin + paddingH, blockContentCursorY + doc.getTextDimensions(splitAmbitoTitle).h / splitAmbitoTitle.length);
+    blockContentCursorY += doc.getTextDimensions(splitAmbitoTitle).h + 3;
 
-    // --- Añadir Título y Texto de Valoración del Ámbito ---
-    addText(ambito.valoracion.titulo, { fontSize: 12, fontStyle: 'bold', textColor: '#000000' }, 3);
-    addText(ambito.valoracion.texto, { fontSize: 10, textColor: '#333333' }, 8);
+    doc.setFontSize(12); // Título de valoración
+    doc.text(splitValoracionTitle, margin + paddingH, blockContentCursorY + doc.getTextDimensions(splitValoracionTitle).h / splitValoracionTitle.length);
+    blockContentCursorY += doc.getTextDimensions(splitValoracionTitle).h + 2;
+
+    doc.setFontSize(10); // Texto de valoración
+    doc.setFontSize(11); // Texto de valoración
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor('#000000');
+    doc.text(splitValoracionText, margin + paddingH, blockContentCursorY + doc.getTextDimensions(splitValoracionText).h / splitValoracionText.length);
+
+    cursorY += blockHeight + 8; // Mover cursorY después del bloque
 
     respuestasDelAmbito.forEach(respuesta => {
       if (cursorY + 25 > doc.internal.pageSize.getHeight() - margin) {
@@ -236,7 +288,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
         cursorY = margin;
       }
       addText(respuesta.aspectoEvaluadoPregunta, { fontSize: 11, fontStyle: 'bold', textColor: '#000000' }, 3);
-      addText(respuesta.comentario, { fontSize: 10, textColor: '#333333' }, 8); // 'comentario' es la valoración detallada
+      addText(respuesta.comentario, { fontSize: 11, textColor: '#000000' }, 8); // 'comentario' es la valoración detallada
     });
 
     cursorY += 5; // Espacio extra entre ámbitos
@@ -279,7 +331,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     cursorY += blockHeight + 8; // Mover cursorY después del bloque
 
     if (ambito.recomendacion && typeof ambito.recomendacion === 'string') {
-      addTextWithBold(ambito.recomendacion, { fontSize: 10, textColor: '#333333' }, 10);
+      addTextWithBold(ambito.recomendacion, { fontSize: 11, textColor: '#000000' }, 10);
     }
   });
 
@@ -293,10 +345,10 @@ export function generarPDF(datosParaPDF: DatosPDF) {
 
   if (valoracionFinal.recomendacion && typeof valoracionFinal.recomendacion === 'string') {
     // Usar la función addTextWithBold para renderizar el texto
-    addTextWithBold(valoracionFinal.recomendacion, { fontSize: 10, textColor: '#333333' }, 8);
+    addTextWithBold(valoracionFinal.recomendacion, { fontSize: 11, textColor: '#000000' }, 8);
 
   } else {
-    addText("No hay una recomendación final disponible.", { fontSize: 10, fontStyle: 'italic', textColor: '#333333' }, 8);
+    addText("No hay una recomendación final disponible.", { fontSize: 11, fontStyle: 'italic', textColor: '#000000' }, 8);
   }
 
 
