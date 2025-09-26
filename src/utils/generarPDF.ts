@@ -70,15 +70,16 @@ export function generarPDF(datosParaPDF: DatosPDF) {
       .replace(/<strong>|<\/strong>|<b>|<\/b>/g, '%%') // Negrita
       .replace(/<i>|<\/i>|<em>|<\/em>/g, '##'); // Itálica
 
-    // 2. Convertir etiquetas de bloque y listas a un marcador de salto de línea único y fiable
+    // 2. Normalizar saltos de línea y listas, y luego eliminar el resto de etiquetas
     processedText = processedText
-      .replace(/<\/p>|<br\s*\/?>/gi, '\n\n') // Párrafos y saltos de línea explícitos
-      .replace(/<\/span>\s*<span[^>]*>/gi, '\n\n') // Párrafos implícitos de WP
-      .replace(/<li[^>]*>/gi, '\n• ') // Listas
+      .replace(/<\/p>/gi, '\n\n') // Párrafos generan un párrafo nuevo.
+      .replace(/<\/li>/gi, '\n') // Fin de listas genera un salto de línea simple.
+      .replace(/<br\s*\/?>/gi, '\n') // Convertir <br> en salto de línea simple.
+      .replace(/<li[^>]*>/gi, '• ') // Añadir viñeta al inicio de <li>.
       .replace(/<[^>]+>/g, ''); // Eliminar todas las demás etiquetas HTML
     
     // 3. Limpiar saltos de línea y espacios múltiples para evitar espaciado excesivo
-    processedText = processedText.replace(/(\s*\n\s*){2,}/g, '\n\n').replace(/^\s+|\s+$/gm, '').trim();
+    processedText = processedText.replace(/(\s*\n){3,}/g, '\n\n').replace(/ +/g, ' ').trim();
 
     doc.setFontSize(fontSize);
     doc.setTextColor(String(textColor));
@@ -96,17 +97,20 @@ export function generarPDF(datosParaPDF: DatosPDF) {
       const lines = segment.split('\n');
       lines.forEach((line, lineIndex) => {
         if (lineIndex > 0) {
-          // Si es un salto de línea, movemos el cursor. Si la línea está vacía, es un párrafo.
-          cursorY += lineHeight * (line.trim() === '' ? 2 : 1);
+          // Si es un salto de línea, movemos el cursor. Si la línea está vacía, es un párrafo nuevo.
+          // Aumentamos el espacio para los párrafos para que sea más notable.
+          // Un párrafo (línea vacía) añade un 80% extra de espacio. Un salto simple, solo la altura de línea.
+          const spaceMultiplier = line.trim() === '' ? 1.8 : 1;
+          cursorY += lineHeight * spaceMultiplier;
           cursorX = margin;
           if (line.trim() === '') return;
         }
 
-        const words = line.split(/(\s+|%%LINK:.*?%%.*?%%\/LINK%%)/g).filter(Boolean);
+        const words = line.split(/(\s+|%%LINK:.*?%%.*?%%\/LINK%%)/g).filter(w => w);
 
         words.forEach(wordOrLink => {
           if (!wordOrLink) return;
-          doc.setFont('helvetica', fontStyle); // Asegurar el estilo correcto para cada palabra
+          doc.setFont('helvetica', fontStyle); // Restaurar estilo para cada palabra/enlace
 
           // Si es un enlace, pintarlo con estilo y funcionalidad de link
           if (wordOrLink.startsWith('%%LINK:')) {
@@ -114,9 +118,9 @@ export function generarPDF(datosParaPDF: DatosPDF) {
             if (linkData) {
               const linkText = linkData[2];
               const linkUrl = linkData[1];
-              const linkWidth = doc.getTextWidth(linkText + ' ');
+              const linkWidth = doc.getTextWidth(linkText);
 
-              if (cursorX + linkWidth > pageWidth - margin && cursorX > margin) {
+              if (cursorX + linkWidth > pageWidth - margin) {
                 cursorY += lineHeight;
                 cursorX = margin;
               }
@@ -124,22 +128,22 @@ export function generarPDF(datosParaPDF: DatosPDF) {
               doc.setTextColor('#0000FF');
               doc.setFont('helvetica', 'normal'); // Los enlaces no heredan negrita/cursiva
               doc.textWithLink(linkText, cursorX, cursorY, { url: linkUrl });
-              doc.line(cursorX, cursorY + 1.2, cursorX + doc.getTextWidth(linkText), cursorY + 1.2); // Subrayado manual
+              doc.line(cursorX, cursorY + 1.2, cursorX + linkWidth, cursorY + 1.2); // Subrayado manual
               doc.setTextColor(String(textColor)); // Restaurar color
               cursorX += linkWidth;
-              return;
+              return; // Continuar con la siguiente palabra/enlace
             }
-          }
+          } else {
+            // Si es una palabra normal
+            const wordWidth = doc.getTextWidth(wordOrLink);
+            if (cursorX + wordWidth > pageWidth - margin && cursorX > margin) { // Evitar salto de línea si la palabra ya está al inicio
+              cursorY += lineHeight;
+              cursorX = margin;
+            }
 
-          // Si es una palabra normal
-          const wordWidth = doc.getTextWidth(wordOrLink);
-          if (cursorX + wordWidth > pageWidth - margin && cursorX > margin) { // Evitar salto de línea si la palabra ya está al inicio
-            cursorY += lineHeight;
-            cursorX = margin;
+            doc.text(wordOrLink, cursorX, cursorY);
+            cursorX += wordWidth;
           }
-
-          doc.text(wordOrLink, cursorX, cursorY);
-          cursorX += wordWidth;
         });
       });
     };
