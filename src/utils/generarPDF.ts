@@ -72,18 +72,18 @@ export function generarPDF(datosParaPDF: DatosPDF) {
 
     // 2. Convertir etiquetas de bloque y listas a un marcador de salto de línea único y fiable
     processedText = processedText
-      .replace(/<\/p>|<br\s*\/?>|<\/ul>|<\/li>/gi, '[BR]') // Párrafos, saltos de línea y fin de listas
-      .replace(/<\/span>/gi, '[BR]') // Tratar el fin de span como un posible salto de párrafo
-      .replace(/<li[^>]*>/gi, '[BR]• ') // Listas
+      .replace(/<\/p>|<br\s*\/?>/gi, '\n\n') // Párrafos y saltos de línea explícitos
+      .replace(/<\/span>\s*<span[^>]*>/gi, '\n\n') // Párrafos implícitos de WP
+      .replace(/<li[^>]*>/gi, '\n• ') // Listas
       .replace(/<[^>]+>/g, ''); // Eliminar todas las demás etiquetas HTML
     
-    // 3. Limpiar múltiples marcadores y espacios para un espaciado consistente
-    processedText = processedText.replace(/(\s*\[BR\]\s*){2,}/g, '[BR]').replace(/\s+/g, ' ').trim();
+    // 3. Limpiar saltos de línea y espacios múltiples para evitar espaciado excesivo
+    processedText = processedText.replace(/(\s*\n\s*){2,}/g, '\n\n').replace(/^\s+|\s+$/gm, '').trim();
 
     doc.setFontSize(fontSize);
     doc.setTextColor(String(textColor));
 
-    // 4. Función para renderizar segmentos de texto, ahora con la nueva lógica
+    // 4. Función para renderizar segmentos de texto (reescrita para mayor robustez)
     const renderSegment = (segment: string, currentStyle: { isBold: boolean, isItalic: boolean }) => {
       if (!segment) return;
 
@@ -92,62 +92,61 @@ export function generarPDF(datosParaPDF: DatosPDF) {
         fontStyle = 'bolditalic';
       } else if (currentStyle.isBold) fontStyle = 'bold';
       else if (currentStyle.isItalic) fontStyle = 'italic';
-      doc.setFont('helvetica', fontStyle);
 
-      // Dividir por nuestro marcador de salto de línea [BR] y espacios
-      const parts = segment.split(/(\[BR\]|\s+|%%LINK:.*?%%.*?%%\/LINK%%)/g).filter(Boolean);
-
-      parts.forEach(part => {
-        if (part === '[BR]') {
-          cursorY += lineHeight; // Salto de línea simple
+      const lines = segment.split('\n');
+      lines.forEach((line, lineIndex) => {
+        if (lineIndex > 0) {
+          // Si es un salto de línea, movemos el cursor. Si la línea está vacía, es un párrafo.
+          cursorY += lineHeight * (line.trim() === '' ? 2 : 1);
           cursorX = margin;
-          return;
+          if (line.trim() === '') return;
         }
 
-        // Lógica para enlaces
-        if (part.startsWith('%%LINK:')) {
-          const linkData = part.match(/%%LINK:(.*?)%%(.*?)%%\/LINK%%/);
-          if (linkData) {
-            const linkText = linkData[2];
-            const linkUrl = linkData[1];
-            const linkWidth = doc.getTextWidth(linkText);
+        const words = line.split(/(\s+|%%LINK:.*?%%.*?%%\/LINK%%)/g).filter(Boolean);
 
-            if (cursorX + linkWidth > pageWidth - margin && cursorX > margin) {
-              cursorY += lineHeight;
-              cursorX = margin;
+        words.forEach(wordOrLink => {
+          if (!wordOrLink) return;
+          doc.setFont('helvetica', fontStyle); // Asegurar el estilo correcto para cada palabra
+
+          // Si es un enlace, pintarlo con estilo y funcionalidad de link
+          if (wordOrLink.startsWith('%%LINK:')) {
+            const linkData = wordOrLink.match(/%%LINK:(.*?)%%(.*?)%%\/LINK%%/);
+            if (linkData) {
+              const linkText = linkData[2];
+              const linkUrl = linkData[1];
+              const linkWidth = doc.getTextWidth(linkText + ' ');
+
+              if (cursorX + linkWidth > pageWidth - margin && cursorX > margin) {
+                cursorY += lineHeight;
+                cursorX = margin;
+              }
+
+              doc.setTextColor('#0000FF');
+              doc.setFont('helvetica', 'normal'); // Los enlaces no heredan negrita/cursiva
+              doc.textWithLink(linkText, cursorX, cursorY, { url: linkUrl });
+              doc.line(cursorX, cursorY + 1.2, cursorX + doc.getTextWidth(linkText), cursorY + 1.2); // Subrayado manual
+              doc.setTextColor(String(textColor)); // Restaurar color
+              cursorX += linkWidth;
+              return;
             }
-            doc.setTextColor('#0000FF');
-            doc.setFont('helvetica', 'normal'); // Los enlaces no heredan estilo
-            doc.textWithLink(linkText, cursorX, cursorY, { url: linkUrl });
-            doc.line(cursorX, cursorY + 1.2, cursorX + linkWidth, cursorY + 1.2); // Subrayado manual
-            doc.setTextColor(String(textColor)); // Restaurar color
-            cursorX += linkWidth;
-            return;
           }
-        }
 
-        // Lógica para palabras normales y espacios
-        const wordWidth = doc.getTextWidth(part);
-        if (cursorX + wordWidth > pageWidth - margin && cursorX > margin) {
-          cursorY += lineHeight;
-          cursorX = margin;
-        }
-        // Si es un espacio al inicio de una nueva línea, no lo pintamos
-        if (part.trim() === '' && cursorX === margin) {
-            return;
-        }
-        doc.text(part, cursorX, cursorY);
-        cursorX += wordWidth;
+          // Si es una palabra normal
+          const wordWidth = doc.getTextWidth(wordOrLink);
+          if (cursorX + wordWidth > pageWidth - margin && cursorX > margin) { // Evitar salto de línea si la palabra ya está al inicio
+            cursorY += lineHeight;
+            cursorX = margin;
+          }
+
+          doc.text(wordOrLink, cursorX, cursorY);
+          cursorX += wordWidth;
+        });
       });
     };
 
-    // 5. Procesar el texto por partes, ahora con el formato correcto
+    // 5. Procesar el texto por partes
     const style = { isBold: false, isItalic: false };
     processedText.split('%%').forEach((boldPart, index) => {
-      if (boldPart.startsWith('LINK:')) {
-        renderSegment('%%' + boldPart, style);
-        return;
-      }
       style.isBold = index % 2 !== 0; // Alternar negrita
       boldPart.split('##').forEach((italicPart, j_index) => {
         style.isItalic = j_index % 2 !== 0;
@@ -156,7 +155,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     });
     
     // Salto de línea final después del bloque de texto
-    cursorY += yOffset;
+    cursorY += lineHeight + yOffset;
   };
 
   // Helper para añadir un título con fondo de color
