@@ -73,7 +73,7 @@ export default function EvaluacionAmbitos({ ambitos, onVerEvaluacionFinal }: Eva
               
               
               <div className="resultado-desc fade-in">
-                <p className="valoracion-ambito" >Tu punto de partida es <strong>{valoracion.titulo || 'N/A'}</strong></p>
+                <p className="valoracion-ambito" >Tu punto de partida es <strong>{valoracion.titulo || 'N/A'}</strong></p>
 
                 <div className="progress-bar-animada-container">
                 <motion.div
