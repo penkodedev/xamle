@@ -203,7 +203,28 @@ export function generarPDF(datosParaPDF: DatosPDF) {
       cursorY = margin;
     }
 
-    addText(`${ambito.nombre} - ${ambito.aspecto_evaluado}`, { fontSize: 14, fontStyle: 'bold', textColor: '#000000' }, 5);
+    // --- Bloque para el título del ámbito con fondo ---
+    const ambitoTitle = `${ambito.nombre} - ${ambito.aspecto_evaluado}`;
+    const paddingH = 3; // Padding horizontal (similar a 10px)
+    const paddingV = 2; // Padding vertical (similar a 5px)
+    const borderRadius = 3; // Border radius (similar a 8px)
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    
+    // Calcular dimensiones del texto para el fondo
+    const splitTitle = doc.splitTextToSize(ambitoTitle, pageWidth - margin * 2 - paddingH * 2);
+    const textDimensions = doc.getTextDimensions(splitTitle);
+    const blockHeight = textDimensions.h + paddingV * 2;
+
+    // Dibujar el fondo redondeado
+    doc.setFillColor('#efefef');
+    doc.roundedRect(margin, cursorY, pageWidth - margin * 2, blockHeight, borderRadius, borderRadius, 'F');
+
+    // Escribir el texto sobre el fondo
+    doc.setTextColor('#000000');
+    doc.text(splitTitle, margin + paddingH, cursorY + paddingV + textDimensions.h / splitTitle.length);
+    cursorY += blockHeight + 5; // Mover cursorY después del bloque
 
     respuestasDelAmbito.forEach(respuesta => {
       if (cursorY + 25 > doc.internal.pageSize.getHeight() - margin) {
@@ -230,7 +251,28 @@ export function generarPDF(datosParaPDF: DatosPDF) {
       cursorY = margin;
     }
 
-    addText(`${ambito.nombre} - ${ambito.aspecto_evaluado}`, { fontSize: 14, fontStyle: 'bold', textColor: '#000000' }, 8);
+    // --- Bloque para el título del ámbito con fondo (replicado para consistencia) ---
+    const ambitoTitle = `${ambito.nombre} - ${ambito.aspecto_evaluado}`;
+    const paddingH = 3; // Padding horizontal (similar a 10px)
+    const paddingV = 2; // Padding vertical (similar a 5px)
+    const borderRadius = 3; // Border radius (similar a 8px)
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+
+    // Calcular dimensiones del texto para el fondo
+    const splitTitle = doc.splitTextToSize(ambitoTitle, pageWidth - margin * 2 - paddingH * 2);
+    const textDimensions = doc.getTextDimensions(splitTitle);
+    const blockHeight = textDimensions.h + paddingV * 2;
+
+    // Dibujar el fondo redondeado
+    doc.setFillColor('#efefef');
+    doc.roundedRect(margin, cursorY, pageWidth - margin * 2, blockHeight, borderRadius, borderRadius, 'F');
+
+    // Escribir el texto sobre el fondo
+    doc.setTextColor('#000000');
+    doc.text(splitTitle, margin + paddingH, cursorY + paddingV + textDimensions.h / splitTitle.length);
+    cursorY += blockHeight + 8; // Mover cursorY después del bloque
 
     if (ambito.recomendacion && typeof ambito.recomendacion === 'string') {
       addTextWithBold(ambito.recomendacion, { fontSize: 10, textColor: '#333333' }, 10);
