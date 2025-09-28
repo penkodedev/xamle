@@ -73,10 +73,10 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     // 2. Normalizar saltos de línea y listas, y luego eliminar el resto de etiquetas
     processedText = processedText
       .replace(/<\/p>/gi, '\n\n') // Párrafos generan un párrafo nuevo.
-      .replace(/<\/li>/gi, '\n') // Fin de listas genera un salto de línea simple.
+      //.replace(/<\/li>/gi, '\n') // Fin de listas genera un salto de línea simple.
       .replace(/<br\s*\/?>/gi, '\n') // Convertir <br> en salto de línea simple.
       .replace(/<li[^>]*>/gi, '• ') // Añadir viñeta al inicio de <li>.
-      .replace(/<[^>]+>/g, ''); // Eliminar todas las demás etiquetas HTML
+      .replace(/<[^>]+>/g, ''); // Eliminar todas las demás etiquetas HTML.
     
     // 3. Limpiar saltos de línea y espacios múltiples para evitar espaciado excesivo
     processedText = processedText.replace(/(\s*\n){3,}/g, '\n\n').replace(/ +/g, ' ').trim();
