@@ -110,8 +110,14 @@ export function generarPDF(datosParaPDF: DatosPDF) {
         if (lineIndex > 0) {
           // Si es un salto de línea, movemos el cursor. Si la línea está vacía, es un párrafo nuevo.
           // Aumentamos el espacio para los párrafos para que sea más notable.
-          // Un párrafo (línea vacía) añade un 50% extra de espacio. Un salto simple, solo la altura de línea.
-          const spaceMultiplier = line.trim() === '' ? 1.5 : 1;
+          // Un párrafo (línea vacía) añade un 50% extra de espacio. 
+          // Un salto simple (como los <li>), usa un multiplicador reducido de 0.6
+          let spaceMultiplier = 1;
+          if (line.trim() === '') {
+            spaceMultiplier = 1.5; // Párrafos
+          } else if (line.trim().startsWith('•')) {
+            spaceMultiplier = 0.6; // Items de lista más compactos
+          }
           checkPageBreak(lineHeight * spaceMultiplier);
           cursorY += lineHeight * spaceMultiplier;
           cursorX = currentMargin;
@@ -254,88 +260,77 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     const paddingV = 4;
     const borderRadius = 2;
     const contentWidth = pageWidth - margin * 2 - paddingH * 2;
-    let totalTextHeight = 0;
 
     // Calcular altura del título del ámbito
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
     const splitAmbitoTitle = doc.splitTextToSize(ambitoTitle, contentWidth - paddingH * 2);
-    totalTextHeight += doc.getTextDimensions(splitAmbitoTitle).h;
 
     // Calcular altura del título de valoración
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
     const splitValoracionTitle = doc.splitTextToSize(ambito.valoracion.titulo, contentWidth - paddingH * 2);
-    totalTextHeight += doc.getTextDimensions(splitValoracionTitle).h + 3; // Espacio antes
 
-    // --- NUEVA LÓGICA PARA CALCULAR ALTURA DE TEXTO HTML ---
-    const getHtmlTextHeight = (htmlText: string, availableWidth: number, fontSize: number) => {
-      let height = 0;
-      doc.setFontSize(fontSize);
-      const lineHeight = doc.getLineHeight() / doc.internal.scaleFactor;
-      
-      // Usamos la misma lógica de limpieza que en addTextWithBold
-      let processed = htmlText
-        .replace(/<\/p>/gi, '\n\n').replace(/<\/li>/gi, '\n').replace(/<br\s*\/?>/gi, '\n')
-        .replace(/<li[^>]*>/gi, '\n• ').replace(/<[^>]+>/g, '');
-      processed = processed.replace(/(\s*\n\s*){3,}/g, '\n\n').replace(/^\s+|\s+$/gm, '').trim();
+    const startY = cursorY; // Guardar posición inicial
+    const startPage = doc.getCurrentPageInfo().pageNumber; // Guardar página inicial
 
-      const lines = processed.split('\n');
-      lines.forEach((line, index) => {
-        if (index > 0) {
-            height += lineHeight * (line.trim() === '' ? 1.5 : 1);
-        }
-        if (line.trim() !== '') {
-            const textDimensions = doc.getTextDimensions(doc.splitTextToSize(line, availableWidth));
-            height += textDimensions.h;
-        } else if (index === 0 && lines.length === 1) {
-            // Handle case where text is just empty paragraphs
-            height += lineHeight;
-        }
-      });
-      return height;
-    };
-
-    const valoracionTextHeight = getHtmlTextHeight(ambito.valoracion.texto, contentWidth - paddingH * 2, 11);
-    totalTextHeight += valoracionTextHeight + 2; // Espacio antes
+    // Renderizar temporalmente el contenido para medir su altura
+    let measureY = cursorY + paddingV;
+    measureY += doc.getTextDimensions(splitAmbitoTitle).h + 3;
+    measureY += doc.getTextDimensions(splitValoracionTitle).h + 5;
     
-    const blockHeight = totalTextHeight + paddingV * 2;
-    const tempCursorY = cursorY; // Guardar la posición Y antes de dibujar el bloque
-
-    // Dibujar el fondo gris redondeado con la altura total calculada
-    doc.setFillColor('#efefef');
-    doc.roundedRect(margin, cursorY, pageWidth - margin * 2, blockHeight, borderRadius, borderRadius, 'F');
-
-    // --- DIBUJAR EL CONTENIDO DENTRO DEL BLOQUE ---
-    let blockContentCursorY = cursorY + paddingV;
-
-    // Título del ámbito
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor('#000000');
-    doc.text(splitAmbitoTitle, margin + paddingH, blockContentCursorY + doc.getTextDimensions(splitAmbitoTitle).h / splitAmbitoTitle.length);
-    blockContentCursorY += doc.getTextDimensions(splitAmbitoTitle).h + 3;
-
-   // Título de la valoración
-    doc.setFontSize(12);
-    doc.text(splitValoracionTitle, margin + paddingH, blockContentCursorY + doc.getTextDimensions(splitValoracionTitle).h / splitValoracionTitle.length);
-    blockContentCursorY += doc.getTextDimensions(splitValoracionTitle).h + 5; // Aumentado a 5 para mayor separación con el texto
-
-    // Usar addTextWithBold para renderizar el texto de valoración, pasando el margen y ancho correctos.
-    cursorY = blockContentCursorY;
+    // Simular el renderizado del texto para saber su altura
+    cursorY = measureY;
     addTextWithBold(ambito.valoracion.texto, { fontSize: 11, textColor: '#000000' }, 0, margin + paddingH, contentWidth - paddingH * 2);
-    cursorY = tempCursorY + blockHeight + 8; // Mover el cursor global después del bloque completo
+    
+    const endPage = doc.getCurrentPageInfo().pageNumber;
+    const endY = cursorY;
+    
+    // Si el contenido provocó un salto de página, no dibujamos el fondo gris
+    if (endPage > startPage) {
+      // El contenido se extendió a otra página, solo mostramos sin fondo
+      cursorY = startY;
+      addText(`${ambito.nombre} - ${ambito.aspecto_evaluado}`, { fontSize: 14, fontStyle: 'bold', textColor: '#000000' }, 3);
+      addText(ambito.valoracion.titulo, { fontSize: 12, fontStyle: 'bold', textColor: '#000000' }, 5);
+      addTextWithBold(ambito.valoracion.texto, { fontSize: 11, textColor: '#000000' }, 8);
+    } else {
+      // El contenido cabe en una página, dibujamos el bloque con fondo
+      const blockHeight = endY - startY + paddingV;
+      
+      // Volver al inicio y dibujar el fondo
+      cursorY = startY;
+      doc.setFillColor('#efefef');
+      doc.roundedRect(margin, cursorY, pageWidth - margin * 2, blockHeight, borderRadius, borderRadius, 'F');
+      
+      // Dibujar el contenido encima del fondo
+      let blockContentCursorY = cursorY + paddingV;
+      
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor('#000000');
+      doc.text(splitAmbitoTitle, margin + paddingH, blockContentCursorY + doc.getTextDimensions(splitAmbitoTitle).h / splitAmbitoTitle.length);
+      blockContentCursorY += doc.getTextDimensions(splitAmbitoTitle).h + 3;
+      
+      doc.setFontSize(12);
+      doc.text(splitValoracionTitle, margin + paddingH, blockContentCursorY + doc.getTextDimensions(splitValoracionTitle).h / splitValoracionTitle.length);
+      blockContentCursorY += doc.getTextDimensions(splitValoracionTitle).h + 5;
+      
+      cursorY = blockContentCursorY;
+      addTextWithBold(ambito.valoracion.texto, { fontSize: 11, textColor: '#000000' }, 0, margin + paddingH, contentWidth - paddingH * 2);
+      
+      cursorY += paddingV + 8;
+    }
 
     respuestasDelAmbito.forEach(respuesta => {
       if (cursorY + 25 > doc.internal.pageSize.getHeight() - margin) {
         doc.addPage();
         cursorY = margin;
       }
-      addText(respuesta.aspectoEvaluadoPregunta, { fontSize: 11, fontStyle: 'bold', textColor: '#000000' }, 3);
-      addText(respuesta.comentario, { fontSize: 11, textColor: '#000000' }, 8); // 'comentario' es la valoración detallada
+      addText(respuesta.aspectoEvaluadoPregunta, { fontSize: 11, fontStyle: 'bold', textColor: '#000000' }, 2);
+      addText(respuesta.comentario, { fontSize: 11, textColor: '#000000' }, 5); // 'comentario' es la valoración detallada
     });
 
-    cursorY += 5; // Espacio extra entre ámbitos
+    cursorY += 3; // Espacio extra entre ámbitos
   });
 
 
@@ -375,7 +370,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     cursorY += blockHeight + 8; // Mover cursorY después del bloque
 
     if (ambito.recomendacion && typeof ambito.recomendacion === 'string') {
-      addTextWithBold(ambito.recomendacion, { fontSize: 11, textColor: '#000000' }, 10);
+      addTextWithBold(ambito.recomendacion, { fontSize: 11, textColor: '#000000' }, 5);
     }
   });
 
