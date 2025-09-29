@@ -62,8 +62,8 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     let cursorX = margin;
 
     // Helper para gestionar saltos de página dentro de esta función
-    const checkPageBreak = () => {
-      if (cursorY > doc.internal.pageSize.getHeight() - margin) {
+    const checkPageBreak = (extraHeight = 0) => {
+      if (cursorY + extraHeight > doc.internal.pageSize.getHeight() - margin) {
         doc.addPage();
         cursorY = margin;
       }
