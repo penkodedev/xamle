@@ -103,7 +103,7 @@ export default function EvaluacionAmbitos({ ambitos, onVerEvaluacionFinal }: Eva
                       style={{ overflow: 'hidden' }}
                     >
                       <div className="accordion-content">
-                        <p>{valoracion.texto || 'Explicación no disponible.'}</p>
+                        <div dangerouslySetInnerHTML={{ __html: valoracion.texto || '<p>Explicación no disponible.</p>' }} />
                       </div>
                     </motion.section>
                   )}

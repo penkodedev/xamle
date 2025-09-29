@@ -321,10 +321,10 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     doc.text(splitValoracionTitle, margin + paddingH, blockContentCursorY + doc.getTextDimensions(splitValoracionTitle).h / splitValoracionTitle.length);
     blockContentCursorY += doc.getTextDimensions(splitValoracionTitle).h + 2;
 
-    // Usar addTextWithBold para renderizar el texto de valoración, pasando el margen y ancho correctos.
+    // Usar addTextWithBold para renderizar el texto de valoración, pasando el margen y ancho correctos para el interior del bloque.
     cursorY = blockContentCursorY;
-    addTextWithBold(ambito.valoracion.texto, { fontSize: 11, textColor: '#000000' }, 0, margin + paddingH, contentWidth - paddingH * 2);
-    cursorY = tempCursorY + blockHeight + 8; // Mover el cursor global después del bloque completo
+    addTextWithBold(ambito.valoracion.texto, { fontSize: 11, textColor: '#000000' }, 0, margin + paddingH, contentWidth);
+    cursorY = tempCursorY + blockHeight + 8; // Mover el cursor global después del bloque
 
     respuestasDelAmbito.forEach(respuesta => {
       if (cursorY + 25 > doc.internal.pageSize.getHeight() - margin) {
