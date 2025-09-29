@@ -316,7 +316,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     doc.text(splitAmbitoTitle, margin + paddingH, blockContentCursorY + doc.getTextDimensions(splitAmbitoTitle).h / splitAmbitoTitle.length);
     blockContentCursorY += doc.getTextDimensions(splitAmbitoTitle).h + 3;
 
-    // Título de la valoración
+   // Título de la valoración
     doc.setFontSize(12);
     doc.text(splitValoracionTitle, margin + paddingH, blockContentCursorY + doc.getTextDimensions(splitValoracionTitle).h / splitValoracionTitle.length);
     blockContentCursorY += doc.getTextDimensions(splitValoracionTitle).h + 5; // Aumentado a 5 para mayor separación con el texto
