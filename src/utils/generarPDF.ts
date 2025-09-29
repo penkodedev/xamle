@@ -61,6 +61,14 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     const lineHeight = doc.getLineHeight() / doc.internal.scaleFactor;
     let cursorX = margin;
 
+    // Helper para gestionar saltos de página dentro de esta función
+    const checkPageBreak = () => {
+      if (cursorY > doc.internal.pageSize.getHeight() - margin) {
+        doc.addPage();
+        cursorY = margin;
+      }
+    };
+
     // 1. Decodificar entidades HTML y reemplazar etiquetas de formato por delimitadores
     let processedText = text
       .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
@@ -72,14 +80,14 @@ export function generarPDF(datosParaPDF: DatosPDF) {
 
     // 2. Normalizar saltos de línea y listas, y luego eliminar el resto de etiquetas
     processedText = processedText
-      .replace(/<\/p>/gi, '\n\n') // Párrafos generan un párrafo nuevo.
-      //.replace(/<\/li>/gi, '\n') // Fin de listas genera un salto de línea simple.
+      .replace(/<\/p>/gi, '\n\n') // Párrafos generan un párrafo nuevo (doble salto).
+      .replace(/<\/li>/gi, '\n') // El final de un elemento de lista es un salto simple.
       .replace(/<br\s*\/?>/gi, '\n') // Convertir <br> en salto de línea simple.
-      .replace(/<li[^>]*>/gi, '• ') // Añadir viñeta al inicio de <li>.
-      .replace(/<[^>]+>/g, ''); // Eliminar todas las demás etiquetas HTML.
+      .replace(/<li[^>]*>/gi, '\n• ') // El inicio de un <li> es un salto de línea + viñeta.
+      .replace(/<[^>]+>/g, ''); // Eliminar todas las demás etiquetas HTML
     
     // 3. Limpiar saltos de línea y espacios múltiples para evitar espaciado excesivo
-    processedText = processedText.replace(/(\s*\n){3,}/g, '\n\n').replace(/ +/g, ' ').trim();
+    processedText = processedText.replace(/(\s*\n\s*){3,}/g, '\n\n').replace(/ +/g, ' ').trim();
 
     doc.setFontSize(fontSize);
     doc.setTextColor(String(textColor));
@@ -99,8 +107,9 @@ export function generarPDF(datosParaPDF: DatosPDF) {
         if (lineIndex > 0) {
           // Si es un salto de línea, movemos el cursor. Si la línea está vacía, es un párrafo nuevo.
           // Aumentamos el espacio para los párrafos para que sea más notable.
-          // Un párrafo (línea vacía) añade un 80% extra de espacio. Un salto simple, solo la altura de línea.
-          const spaceMultiplier = line.trim() === '' ? 1.8 : 1;
+          // Un párrafo (línea vacía) añade un 50% extra de espacio. Un salto simple, solo la altura de línea.
+          const spaceMultiplier = line.trim() === '' ? 1.5 : 1;
+          checkPageBreak(lineHeight * spaceMultiplier);
           cursorY += lineHeight * spaceMultiplier;
           cursorX = margin;
           if (line.trim() === '') return;
@@ -122,6 +131,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
 
               if (cursorX + linkWidth > pageWidth - margin) {
                 cursorY += lineHeight;
+                checkPageBreak(lineHeight);
                 cursorX = margin;
               }
 
@@ -138,6 +148,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
             const wordWidth = doc.getTextWidth(wordOrLink);
             if (cursorX + wordWidth > pageWidth - margin && cursorX > margin) { // Evitar salto de línea si la palabra ya está al inicio
               cursorY += lineHeight;
+              checkPageBreak(lineHeight);
               cursorX = margin;
             }
 
@@ -159,7 +170,8 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     });
     
     // Salto de línea final después del bloque de texto
-    cursorY += lineHeight + yOffset;
+    // cursorY += lineHeight + yOffset; // Comentado según tu indicación
+    cursorY += yOffset;
   };
 
   // Helper para añadir un título con fondo de color

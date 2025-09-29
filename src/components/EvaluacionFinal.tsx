@@ -227,9 +227,7 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
 
       <div className="texto-eval-final">
         {valoracionFinal?.texto_valoracion ? (
-          valoracionFinal.texto_valoracion.split('\n').filter(p => p.trim() !== '').map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
-          ))
+          <div dangerouslySetInnerHTML={{ __html: valoracionFinal.texto_valoracion }} />
         ) : (
           <p>Cargando recomendación...</p>
         )}
