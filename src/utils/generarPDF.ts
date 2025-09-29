@@ -18,7 +18,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
   } = datosParaPDF;
 
   const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-  const margin = 20;
+  let margin = 20;
   const pageWidth = doc.internal.pageSize.getWidth();
   let cursorY = 10;
 
@@ -56,10 +56,13 @@ export function generarPDF(datosParaPDF: DatosPDF) {
   };
 
   // Helper para añadir texto que puede contener negritas (<strong> o <b>)
-  const addTextWithBold = (text: string, options: { fontSize?: number; textColor?: string | number; }, yOffset = 5) => {
+  const addTextWithBold = (text: string, options: { fontSize?: number; textColor?: string | number; }, yOffset = 5, customMargin?: number, customWidth?: number) => {
     const { fontSize = 10, textColor = '#333333' } = options;
     const lineHeight = doc.getLineHeight() / doc.internal.scaleFactor;
-    let cursorX = margin;
+    // Usa el margen personalizado si se proporciona, si no, el margen global.
+    const currentMargin = customMargin !== undefined ? customMargin : margin;
+    const availableWidth = customWidth !== undefined ? customWidth : (pageWidth - currentMargin * 2);
+    let cursorX = currentMargin;
 
     // Helper para gestionar saltos de página dentro de esta función
     const checkPageBreak = (extraHeight = 0) => {
@@ -111,7 +114,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
           const spaceMultiplier = line.trim() === '' ? 1.5 : 1;
           checkPageBreak(lineHeight * spaceMultiplier);
           cursorY += lineHeight * spaceMultiplier;
-          cursorX = margin;
+          cursorX = currentMargin;
           if (line.trim() === '') return;
         }
 
@@ -129,10 +132,10 @@ export function generarPDF(datosParaPDF: DatosPDF) {
               const linkUrl = linkData[1];
               const linkWidth = doc.getTextWidth(linkText);
 
-              if (cursorX + linkWidth > pageWidth - margin) {
+              if (cursorX + linkWidth > currentMargin + availableWidth && cursorX > currentMargin) {
                 cursorY += lineHeight;
                 checkPageBreak(lineHeight);
-                cursorX = margin;
+                cursorX = currentMargin;
               }
 
               doc.setTextColor('#0000FF');
@@ -146,10 +149,10 @@ export function generarPDF(datosParaPDF: DatosPDF) {
           } else {
             // Si es una palabra normal
             const wordWidth = doc.getTextWidth(wordOrLink);
-            if (cursorX + wordWidth > pageWidth - margin && cursorX > margin) { // Evitar salto de línea si la palabra ya está al inicio
+            if (cursorX + wordWidth > currentMargin + availableWidth && cursorX > currentMargin) { // Evitar salto de línea si la palabra ya está al inicio
               cursorY += lineHeight;
               checkPageBreak(lineHeight);
-              cursorX = margin;
+              cursorX = currentMargin;
             }
 
             doc.text(wordOrLink, cursorX, cursorY);
@@ -265,37 +268,63 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     const splitValoracionTitle = doc.splitTextToSize(ambito.valoracion.titulo, contentWidth - paddingH * 2);
     totalTextHeight += doc.getTextDimensions(splitValoracionTitle).h + 3; // Espacio antes
 
-    // Calcular altura del texto de valoración
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
-    const splitValoracionText = doc.splitTextToSize(ambito.valoracion.texto, contentWidth - paddingH * 2);
-    totalTextHeight += doc.getTextDimensions(splitValoracionText).h + 2; // Espacio antes
+    // --- NUEVA LÓGICA PARA CALCULAR ALTURA DE TEXTO HTML ---
+    const getHtmlTextHeight = (htmlText: string, availableWidth: number, fontSize: number) => {
+      let height = 0;
+      doc.setFontSize(fontSize);
+      const lineHeight = doc.getLineHeight() / doc.internal.scaleFactor;
+      
+      // Usamos la misma lógica de limpieza que en addTextWithBold
+      let processed = htmlText
+        .replace(/<\/p>/gi, '\n\n').replace(/<\/li>/gi, '\n').replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<li[^>]*>/gi, '\n• ').replace(/<[^>]+>/g, '');
+      processed = processed.replace(/(\s*\n\s*){3,}/g, '\n\n').replace(/^\s+|\s+$/gm, '').trim();
 
+      const lines = processed.split('\n');
+      lines.forEach((line, index) => {
+        if (index > 0) {
+            height += lineHeight * (line.trim() === '' ? 1.5 : 1);
+        }
+        if (line.trim() !== '') {
+            const textDimensions = doc.getTextDimensions(doc.splitTextToSize(line, availableWidth));
+            height += textDimensions.h;
+        } else if (index === 0 && lines.length === 1) {
+            // Handle case where text is just empty paragraphs
+            height += lineHeight;
+        }
+      });
+      return height;
+    };
+
+    const valoracionTextHeight = getHtmlTextHeight(ambito.valoracion.texto, contentWidth - paddingH * 2, 11);
+    totalTextHeight += valoracionTextHeight + 2; // Espacio antes
+    
     const blockHeight = totalTextHeight + paddingV * 2;
+    const tempCursorY = cursorY; // Guardar la posición Y antes de dibujar el bloque
 
     // Dibujar el fondo gris redondeado con la altura total calculada
     doc.setFillColor('#efefef');
     doc.roundedRect(margin, cursorY, pageWidth - margin * 2, blockHeight, borderRadius, borderRadius, 'F');
 
-    // Escribir los textos uno debajo del otro dentro del bloque
+    // --- DIBUJAR EL CONTENIDO DENTRO DEL BLOQUE ---
     let blockContentCursorY = cursorY + paddingV;
+
+    // Título del ámbito
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor('#000000');
     doc.text(splitAmbitoTitle, margin + paddingH, blockContentCursorY + doc.getTextDimensions(splitAmbitoTitle).h / splitAmbitoTitle.length);
     blockContentCursorY += doc.getTextDimensions(splitAmbitoTitle).h + 3;
 
-    doc.setFontSize(12); // Título de valoración
+    // Título de la valoración
+    doc.setFontSize(12);
     doc.text(splitValoracionTitle, margin + paddingH, blockContentCursorY + doc.getTextDimensions(splitValoracionTitle).h / splitValoracionTitle.length);
     blockContentCursorY += doc.getTextDimensions(splitValoracionTitle).h + 2;
 
-    doc.setFontSize(10); // Texto de valoración
-    doc.setFontSize(11); // Texto de valoración
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor('#000000');
-    doc.text(splitValoracionText, margin + paddingH, blockContentCursorY + doc.getTextDimensions(splitValoracionText).h / splitValoracionText.length);
-
-    cursorY += blockHeight + 8; // Mover cursorY después del bloque
+    // Usar addTextWithBold para renderizar el texto de valoración, pasando el margen y ancho correctos.
+    cursorY = blockContentCursorY;
+    addTextWithBold(ambito.valoracion.texto, { fontSize: 11, textColor: '#000000' }, 0, margin + paddingH, contentWidth - paddingH * 2);
+    cursorY = tempCursorY + blockHeight + 8; // Mover el cursor global después del bloque completo
 
     respuestasDelAmbito.forEach(respuesta => {
       if (cursorY + 25 > doc.internal.pageSize.getHeight() - margin) {
