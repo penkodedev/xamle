@@ -329,7 +329,6 @@ export function generarPDF(datosParaPDF: DatosPDF) {
       // Dibujar el contenido encima del fondo
       let blockContentCursorY = cursorY + paddingV;
       
-      doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor('#000000');
       doc.text(splitAmbitoTitle, margin + paddingH, blockContentCursorY + doc.getTextDimensions(splitAmbitoTitle).h / splitAmbitoTitle.length);
