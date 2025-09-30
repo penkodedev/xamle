@@ -72,30 +72,52 @@ export function generarPDF(datosParaPDF: DatosPDF) {
       }
     };
 
-    // 1. Decodificar entidades HTML y reemplazar etiquetas de formato por delimitadores
-    let processedText = text
-      .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
-      .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
-      // Reemplazar etiquetas <a> por un delimitador especial que contiene la URL y el texto
-      .replace(/<a\s+(?:[^>]*?\s+)?href="([^"]*)"[^>]*?>(.*?)<\/a>/gi, '%%LINK:$1%%$2%%/LINK%%')
-      .replace(/<strong>|<\/strong>|<b>|<\/b>/g, '%%') // Negrita
-      .replace(/<i>|<\/i>|<em>|<\/em>/g, '##'); // Itálica
+// 1. Primero decodificar TODAS las entidades HTML y caracteres Unicode escapados
+    // Crear un elemento temporal para decodificar entidades HTML
+    const decodeHTML = (input: string) => {
+      let text = input;
+      // Bucle para decodificar múltiples niveles de escapado (ej: &amp;lt; se convierte en &lt; y luego en <)
+      while (text.includes('&lt;') || text.includes('&amp;')) {
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = text;
+        text = textarea.value;
+      }
+      return text;
+    };
+    
+    // 1. Decodificar el texto HTML para tener etiquetas limpias como <p>, <a>, etc.
+    let processedText = decodeHTML(text);
+    console.log('Texto después de decodificar HTML:', processedText.substring(0, 200));
 
-    // 2. Normalizar saltos de línea y listas, y luego eliminar el resto de etiquetas
+    // 2. Ahora que tenemos HTML limpio, procesamos las etiquetas y las convertimos a nuestros delimitadores.
+    //    Este orden es crucial para que los enlaces <a> se detecten correctamente.
+    processedText = processedText
+      .replace(/<strong>|<\/strong>|<b>|<\/b>/g, '%%') // Negrita
+      .replace(/<i>|<\/i>|<em>|<\/em>/g, '##') // Itálica
+      // Procesar etiquetas <a> HTML y convertirlas a nuestro delimitador interno
+      .replace(/<a\s+(?:[^>]*?\s+)?href=["']([^"']*?)["'][^>]*?>(.*?)<\/a>/gi, (match, url, text) => {
+        console.log('Encontrado enlace:', { match, url, text });
+        return `%%LINK:${url}%%${text}%%/LINK%%`;
+      });
+    
+    // Debug: mostrar después del procesamiento
+    console.log('Texto después de procesar tags:', processedText.substring(0, 200));
+
+    // 3. Normalizar saltos de línea y listas, y luego eliminar el resto de etiquetas
     processedText = processedText
       .replace(/<\/p>/gi, '\n\n') // Párrafos generan un párrafo nuevo (doble salto).
       .replace(/<\/li>/gi, '\n') // El final de un elemento de lista es un salto simple.
-      .replace(/<br\s*\/?>/gi, '\n') // Convertir <br> en salto de línea simple.
+      //.replace(/<br\s*\/?>/gi, '\n') // Convertir <br> en salto de línea simple.
       .replace(/<li[^>]*>/gi, '\n• ') // El inicio de un <li> es un salto de línea + viñeta.
       .replace(/<[^>]+>/g, ''); // Eliminar todas las demás etiquetas HTML
     
-    // 3. Limpiar saltos de línea y espacios múltiples para evitar espaciado excesivo
+    // 4. Limpiar saltos de línea y espacios múltiples para evitar espaciado excesivo
     processedText = processedText.replace(/(\s*\n\s*){3,}/g, '\n\n').replace(/ +/g, ' ').trim();
 
     doc.setFontSize(fontSize);
     doc.setTextColor(String(textColor));
 
-    // 4. Función para renderizar segmentos de texto (reescrita para mayor robustez)
+    // 5. Función para renderizar segmentos de texto (reescrita para mayor robustez)
     const renderSegment = (segment: string, currentStyle: { isBold: boolean, isItalic: boolean }) => {
       if (!segment) return;
 
@@ -124,15 +146,15 @@ export function generarPDF(datosParaPDF: DatosPDF) {
           if (line.trim() === '') return;
         }
 
-        const words = line.split(/(\s+|%%LINK:.*?%%.*?%%\/LINK%%)/g).filter(w => w);
+        const parts = line.split(/(%%LINK:.+?%%.+?%%\/LINK%%)/g).filter(p => p);
 
-        words.forEach(wordOrLink => {
-          if (!wordOrLink) return;
+        parts.forEach(part => {
+          if (!part) return;
           doc.setFont('helvetica', fontStyle); // Restaurar estilo para cada palabra/enlace
 
-          // Si es un enlace, pintarlo con estilo y funcionalidad de link
-          if (wordOrLink.startsWith('%%LINK:')) {
-            const linkData = wordOrLink.match(/%%LINK:(.*?)%%(.*?)%%\/LINK%%/);
+          // Si la parte es un enlace, procesarlo como tal
+          if (part.startsWith('%%LINK:')) {
+            const linkData = part.match(/%%LINK:(.*?)%%(.*?)%%\/LINK%%/);
             if (linkData) {
               const linkText = linkData[2];
               const linkUrl = linkData[1];
@@ -146,29 +168,31 @@ export function generarPDF(datosParaPDF: DatosPDF) {
 
               doc.setTextColor('#0000FF');
               doc.setFont('helvetica', 'normal'); // Los enlaces no heredan negrita/cursiva
-              doc.textWithLink(linkText, cursorX, cursorY, { url: linkUrl });
+              doc.textWithLink(linkText, cursorX, cursorY, { url: `javascript:window.open('${linkUrl.replace(/'/g, "\\'")}')` });
               doc.line(cursorX, cursorY + 1.2, cursorX + linkWidth, cursorY + 1.2); // Subrayado manual
               doc.setTextColor(String(textColor)); // Restaurar color
               cursorX += linkWidth;
               return; // Continuar con la siguiente palabra/enlace
             }
           } else {
-            // Si es una palabra normal
-            const wordWidth = doc.getTextWidth(wordOrLink);
-            if (cursorX + wordWidth > currentMargin + availableWidth && cursorX > currentMargin) { // Evitar salto de línea si la palabra ya está al inicio
-              cursorY += lineHeight;
-              checkPageBreak(lineHeight);
-              cursorX = currentMargin;
-            }
-
-            doc.text(wordOrLink, cursorX, cursorY);
-            cursorX += wordWidth;
+            // Si es texto normal, lo procesamos palabra por palabra para el ajuste de línea
+            const words = part.split(/(\s+)/g).filter(w => w);
+            words.forEach(word => {
+              const wordWidth = doc.getTextWidth(word);
+              if (cursorX + wordWidth > currentMargin + availableWidth && cursorX > currentMargin) {
+                cursorY += lineHeight;
+                checkPageBreak(lineHeight);
+                cursorX = currentMargin;
+              }
+              doc.text(word, cursorX, cursorY);
+              cursorX += wordWidth;
+            });
           }
         });
       });
     };
 
-    // 5. Procesar el texto por partes
+    // 6. Procesar el texto por partes
     const style = { isBold: false, isItalic: false };
     processedText.split('%%').forEach((boldPart, index) => {
       style.isBold = index % 2 !== 0; // Alternar negrita
