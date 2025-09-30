@@ -92,13 +92,13 @@ export function generarPDF(datosParaPDF: DatosPDF) {
     // 2. Ahora que tenemos HTML limpio, procesamos las etiquetas y las convertimos a nuestros delimitadores.
     //    Este orden es crucial para que los enlaces <a> se detecten correctamente.
     processedText = processedText
-      .replace(/<strong>|<\/strong>|<b>|<\/b>/g, '%%') // Negrita
-      .replace(/<i>|<\/i>|<em>|<\/em>/g, '##') // Itálica
       // Procesar etiquetas <a> HTML y convertirlas a nuestro delimitador interno
       .replace(/<a\s+(?:[^>]*?\s+)?href=["']([^"']*?)["'][^>]*?>(.*?)<\/a>/gi, (match, url, text) => {
         console.log('Encontrado enlace:', { match, url, text });
-        return `%%LINK:${url}%%${text}%%/LINK%%`;
-      });
+        return `$$LINK:${url}$$${text}$$LINK$$`;
+      })
+      .replace(/<strong>|<\/strong>|<b>|<\/b>/g, '%%') // Negrita
+      .replace(/<i>|<\/i>|<em>|<\/em>/g, '##'); // Itálica
     
     // Debug: mostrar después del procesamiento
     console.log('Texto después de procesar tags:', processedText.substring(0, 200));
@@ -146,15 +146,15 @@ export function generarPDF(datosParaPDF: DatosPDF) {
           if (line.trim() === '') return;
         }
 
-        const parts = line.split(/(%%LINK:.+?%%.+?%%\/LINK%%)/g).filter(p => p);
+        const parts = line.split(/(\$\$LINK:.+?\$\$.+?\$\$LINK\$\$)/g).filter(p => p);
 
         parts.forEach(part => {
           if (!part) return;
           doc.setFont('helvetica', fontStyle); // Restaurar estilo para cada palabra/enlace
 
           // Si la parte es un enlace, procesarlo como tal
-          if (part.startsWith('%%LINK:')) {
-            const linkData = part.match(/%%LINK:(.*?)%%(.*?)%%\/LINK%%/);
+          if (part.startsWith('$$LINK:')) {
+            const linkData = part.match(/\$\$LINK:(.*?)\$\$(.*?)\$\$LINK\$\$/);
             if (linkData) {
               const linkText = linkData[2];
               const linkUrl = linkData[1];
@@ -168,7 +168,7 @@ export function generarPDF(datosParaPDF: DatosPDF) {
 
               doc.setTextColor('#0000FF');
               doc.setFont('helvetica', 'normal'); // Los enlaces no heredan negrita/cursiva
-              doc.textWithLink(linkText, cursorX, cursorY, { url: `javascript:window.open('${linkUrl.replace(/'/g, "\\'")}')` });
+              doc.textWithLink(linkText, cursorX, cursorY, { url: linkUrl });
               doc.line(cursorX, cursorY + 1.2, cursorX + linkWidth, cursorY + 1.2); // Subrayado manual
               doc.setTextColor(String(textColor)); // Restaurar color
               cursorX += linkWidth;
