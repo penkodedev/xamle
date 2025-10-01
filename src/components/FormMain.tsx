@@ -156,7 +156,7 @@ export default function FormMain() {
       genero: form.genero,
       edad: Number(form.edad),
       identidad_etnica: form.etnia,
-      sub_etnias: form.etnia === 'Persona racializada' ? form.etniaDetalles || '' : '',
+      sub_etnias: form.etnia === 'Persona racializada' && form.etniaDetalles ? [form.etniaDetalles] : [],
       otra_etnia: form.etnia === 'Persona racializada' ? form.etniaOtra : '',
       colectivo: form.colectivo,
       pais: form.pais,
