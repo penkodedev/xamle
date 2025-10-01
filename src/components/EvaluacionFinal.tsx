@@ -2,39 +2,39 @@ import React, { useEffect, useState } from "react";
 import { generarPDF } from "@/utils/generarPDF";
 import { DatosPDF, AmbitoPDF, Pregunta } from '@/types/index'; // Importamos Pregunta desde la fuente única
 
-type ValoracionAmbito = {
-  nivel: string;
-  titulo: string;
-  puntuacion_min: number;
-  puntuacion_max: number;
-  texto: string;
-  recomendacion: string;
-};
+// type ValoracionAmbito = {
+//   nivel: string;
+//   titulo: string;
+//   puntuacion_min: number;
+//   puntuacion_max: number;
+//   texto: string;
+//   recomendacion: string;
+// };
 
-type AmbitoData = {
-  nombre: string;
-  puntuacion: number;
-  puntuacionMaxima: number;
-  valoraciones: ValoracionAmbito[];
-  aspecto_evaluado: string;
-};
+// type AmbitoData = {
+//   nombre: string;
+//   puntuacion: number;
+//   puntuacionMaxima: number;
+//   valoraciones: ValoracionAmbito[];
+//   aspecto_evaluado: string;
+// };
 
-type Valoracion = {
-  titulo: string;
-  puntuacion_minima: number;
-  puntuacion_maxima: number;
-  texto_valoracion: string;
-  recomendacion: string;
-};
+// type Valoracion = {
+//   titulo: string;
+//   puntuacion_minima: number;
+//   puntuacion_maxima: number;
+//   texto_valoracion: string;
+//   recomendacion: string;
+// };
 
-type EvaluacionFinalProps = {
-  ambitos: AmbitoData[];
-  puntuacionFinal: number;
-  puntuacionMaxima: number;
-  preguntas: Pregunta[];
-  respuestasUsuario: { [key: number]: number };
-  valoraciones: Valoracion[];
-};
+// type EvaluacionFinalProps = {
+//   ambitos: AmbitoData[];
+//   puntuacionFinal: number;
+//   puntuacionMaxima: number;
+//   preguntas: Pregunta[];
+//   respuestasUsuario: { [key: number]: number };
+//   valoraciones: Valoracion[];
+// };
 
 function getValoracionPorPuntuacion(puntos: number, valoraciones: Valoracion[]): Valoracion | null {  
   if (!valoraciones || valoraciones.length === 0) return null;
