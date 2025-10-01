@@ -206,7 +206,7 @@ export default function EvaluacionFinal({ ambitos, puntuacionFinal, puntuacionMa
       <ul className="listado-result-amb final">
         {ambitos.map((ambito, idx) => (
           <li key={ambito.nombre}>
-            <p>Has sumado <strong>{animatedScores[idx]}</strong> puntos en el ámbito <strong>{ambito.nombre}</strong> - {ambito.aspecto_evaluado}</p>
+            <p>Has sumado <strong>{animatedScores[idx]}</strong> puntos en el <strong>{ambito.nombre}</strong> - {ambito.aspecto_evaluado}</p>
             <div className="progress-bar-animada-container">
               <div
                 className="progress-bar-animada"
